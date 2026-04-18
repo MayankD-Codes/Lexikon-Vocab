@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      words: {
+        Row: {
+          antonyms: string | null
+          created_at: string
+          example_sentence: string | null
+          id: string
+          meaning_english: string | null
+          meaning_hindi: string | null
+          notes: string | null
+          part_of_speech: string | null
+          pronunciation: string | null
+          spelling: string | null
+          synonyms: string | null
+          updated_at: string
+          word: string
+          word_forms: string | null
+        }
+        Insert: {
+          antonyms?: string | null
+          created_at?: string
+          example_sentence?: string | null
+          id?: string
+          meaning_english?: string | null
+          meaning_hindi?: string | null
+          notes?: string | null
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          spelling?: string | null
+          synonyms?: string | null
+          updated_at?: string
+          word: string
+          word_forms?: string | null
+        }
+        Update: {
+          antonyms?: string | null
+          created_at?: string
+          example_sentence?: string | null
+          id?: string
+          meaning_english?: string | null
+          meaning_hindi?: string | null
+          notes?: string | null
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          spelling?: string | null
+          synonyms?: string | null
+          updated_at?: string
+          word?: string
+          word_forms?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
