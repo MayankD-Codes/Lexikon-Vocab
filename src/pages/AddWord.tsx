@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
@@ -17,7 +16,14 @@ const schema = z.object({
   spelling: z.string().trim().max(150).optional(),
   meaning_english: z.string().trim().max(1000).optional(),
   meaning_hindi: z.string().trim().max(1000).optional(),
-  part_of_speech: z.string().trim().max(50).optional(),
+  pos_noun: z.string().trim().max(200).optional(),
+  pos_verb: z.string().trim().max(200).optional(),
+  pos_adjective: z.string().trim().max(200).optional(),
+  pos_adverb: z.string().trim().max(200).optional(),
+  pos_pronoun: z.string().trim().max(200).optional(),
+  pos_preposition: z.string().trim().max(200).optional(),
+  pos_conjunction: z.string().trim().max(200).optional(),
+  pos_interjection: z.string().trim().max(200).optional(),
   word_forms: z.string().trim().max(500).optional(),
   example_sentence: z.string().trim().max(1000).optional(),
   synonyms: z.string().trim().max(500).optional(),
@@ -27,9 +33,22 @@ const schema = z.object({
 
 type FormState = z.infer<typeof schema>;
 
+const POS_FIELDS: { key: keyof FormState; label: string }[] = [
+  { key: "pos_noun", label: "Noun" },
+  { key: "pos_verb", label: "Verb" },
+  { key: "pos_adjective", label: "Adjective" },
+  { key: "pos_adverb", label: "Adverb" },
+  { key: "pos_pronoun", label: "Pronoun" },
+  { key: "pos_preposition", label: "Preposition" },
+  { key: "pos_conjunction", label: "Conjunction" },
+  { key: "pos_interjection", label: "Interjection" },
+];
+
 const initial: FormState = {
   word: "", pronunciation: "", spelling: "", meaning_english: "", meaning_hindi: "",
-  part_of_speech: "", word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
+  pos_noun: "", pos_verb: "", pos_adjective: "", pos_adverb: "",
+  pos_pronoun: "", pos_preposition: "", pos_conjunction: "", pos_interjection: "",
+  word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
 };
 
 const AddWord = () => {
@@ -47,9 +66,19 @@ const AddWord = () => {
       return;
     }
     setSaving(true);
-    const payload = Object.fromEntries(
-      Object.entries(parsed.data).map(([k, v]) => [k, v && v.length ? v : null])
+    const data = parsed.data;
+    const posCombined = POS_FIELDS
+      .map(({ key, label }) => {
+        const v = (data[key] ?? "").trim();
+        return v ? `${label.toLowerCase()}: ${v}` : null;
+      })
+      .filter(Boolean)
+      .join("; ");
+    const { pos_noun, pos_verb, pos_adjective, pos_adverb, pos_pronoun, pos_preposition, pos_conjunction, pos_interjection, ...rest } = data;
+    const payload: Record<string, string | null> = Object.fromEntries(
+      Object.entries(rest).map(([k, v]) => [k, v && v.length ? v : null])
     );
+    payload.part_of_speech = posCombined.length ? posCombined : null;
     const { error } = await supabase.from("words").insert(payload as any);
     setSaving(false);
     if (error) {
@@ -86,20 +115,22 @@ const AddWord = () => {
               <Label htmlFor="spelling">Spelling</Label>
               <Input id="spelling" value={form.spelling} onChange={(e) => set("spelling", e.target.value)} placeholder="e-phem-er-al" maxLength={150} />
             </div>
-            <div>
-              <Label htmlFor="part_of_speech">Part of speech</Label>
-              <Select value={form.part_of_speech} onValueChange={(v) => set("part_of_speech", v)}>
-                <SelectTrigger id="part_of_speech"><SelectValue placeholder="Select…" /></SelectTrigger>
-                <SelectContent>
-                  {["noun", "verb", "adjective", "adverb", "pronoun", "preposition", "conjunction", "interjection"].map((p) => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
+            <div className="sm:col-span-2">
               <Label htmlFor="word_forms">Word forms</Label>
               <Input id="word_forms" value={form.word_forms} onChange={(e) => set("word_forms", e.target.value)} placeholder="noun: ephemerality" maxLength={500} />
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-2 block">Part of speech</Label>
+            <p className="text-xs text-muted-foreground mb-3">Fill in the form(s) the word takes for each applicable type.</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {POS_FIELDS.map(({ key, label }) => (
+                <div key={key}>
+                  <Label htmlFor={key} className="text-sm">{label}</Label>
+                  <Input id={key} value={form[key] ?? ""} onChange={(e) => set(key, e.target.value)} maxLength={200} />
+                </div>
+              ))}
             </div>
           </div>
 
