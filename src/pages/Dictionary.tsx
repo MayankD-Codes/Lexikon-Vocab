@@ -7,13 +7,52 @@ import type { Word } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, BookOpen, Download, Upload } from "lucide-react";
+import { Search, Plus, BookOpen, Download, Upload, FileDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const EXPORT_FIELDS: (keyof Word)[] = [
   "word", "pronunciation", "spelling", "meaning_english", "meaning_hindi",
   "part_of_speech", "word_forms", "example_sentence", "synonyms", "antonyms", "notes",
 ];
+
+const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
+
+const TEMPLATE_HEADERS = [
+  "Word *",
+  "Pronunciation",
+  "Spelling",
+  "Word forms",
+  ...POS_PARTS,
+  "Meaning (English)",
+  "Meaning (Hindi)",
+  "Example sentence",
+  "Synonyms",
+  "Antonyms",
+  "Notes",
+];
+
+// Map normalized header (lowercase, trimmed) -> Word field key
+const HEADER_TO_FIELD: Record<string, keyof Word> = {
+  "word": "word",
+  "word *": "word",
+  "pronunciation": "pronunciation",
+  "spelling": "spelling",
+  "word forms": "word_forms",
+  "word_forms": "word_forms",
+  "meaning (english)": "meaning_english",
+  "meaning english": "meaning_english",
+  "meaning_english": "meaning_english",
+  "meaning (hindi)": "meaning_hindi",
+  "meaning hindi": "meaning_hindi",
+  "meaning_hindi": "meaning_hindi",
+  "example sentence": "example_sentence",
+  "example_sentence": "example_sentence",
+  "synonyms": "synonyms",
+  "antonyms": "antonyms",
+  "notes": "notes",
+  "part of speech": "part_of_speech",
+  "part_of_speech": "part_of_speech",
+};
 
 type Sort = "newest" | "oldest" | "az";
 
