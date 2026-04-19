@@ -1,12 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import * as XLSX from "xlsx";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, BookOpen } from "lucide-react";
+import { Search, Plus, BookOpen, Download, Upload } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+
+const EXPORT_FIELDS: (keyof Word)[] = [
+  "word", "pronunciation", "spelling", "meaning_english", "meaning_hindi",
+  "part_of_speech", "word_forms", "example_sentence", "synonyms", "antonyms", "notes",
+];
 
 type Sort = "newest" | "oldest" | "az";
 
@@ -15,15 +22,81 @@ const Dictionary = () => {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("newest");
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadWords = async () => {
+    const { data, error } = await supabase.from("words").select("*").order("created_at", { ascending: false });
+    if (!error && data) setWords(data as Word[]);
+    setLoading(false);
+  };
 
   useEffect(() => {
     document.title = "Dictionary — Lexikon";
-    (async () => {
-      const { data, error } = await supabase.from("words").select("*").order("created_at", { ascending: false });
-      if (!error && data) setWords(data as Word[]);
-      setLoading(false);
-    })();
+    loadWords();
   }, []);
+
+  const handleExport = () => {
+    if (words.length === 0) {
+      toast({ title: "Nothing to export", description: "Add some words first." });
+      return;
+    }
+    const rows = words.map((w) => {
+      const r: Record<string, string> = {};
+      EXPORT_FIELDS.forEach((f) => { r[f] = (w[f] as string) ?? ""; });
+      return r;
+    });
+    const ws = XLSX.utils.json_to_sheet(rows, { header: EXPORT_FIELDS as string[] });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Words");
+    XLSX.writeFile(wb, `lexikon-words-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast({ title: "Exported", description: `${words.length} word${words.length === 1 ? "" : "s"} exported.` });
+  };
+
+  const handleImportClick = () => fileInputRef.current?.click();
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImporting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+      const payload = rows
+        .map((r) => {
+          const norm: Record<string, string> = {};
+          Object.keys(r).forEach((k) => { norm[k.trim().toLowerCase()] = String(r[k] ?? "").trim(); });
+          const word = norm["word"];
+          if (!word) return null;
+          const obj: Record<string, string | null> = { word };
+          EXPORT_FIELDS.filter((f) => f !== "word").forEach((f) => {
+            obj[f] = norm[f] ? norm[f] : null;
+          });
+          return obj;
+        })
+        .filter((r): r is Record<string, string | null> => r !== null);
+
+      if (payload.length === 0) {
+        toast({ title: "No valid rows", description: "Make sure your file has a 'word' column.", variant: "destructive" });
+        return;
+      }
+
+      const { error } = await supabase.from("words").insert(payload as never);
+      if (error) {
+        toast({ title: "Import failed", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Imported", description: `${payload.length} word${payload.length === 1 ? "" : "s"} added.` });
+      await loadWords();
+    } catch (err) {
+      toast({ title: "Import failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -52,9 +125,24 @@ const Dictionary = () => {
               {loading ? "Loading…" : `${words.length} word${words.length === 1 ? "" : "s"} saved`}
             </p>
           </div>
-          <Button asChild>
-            <Link to="/add"><Plus className="h-4 w-4" /> Add Word</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <Button variant="outline" onClick={handleImportClick} disabled={importing}>
+              <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Import"}
+            </Button>
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="h-4 w-4" /> Export
+            </Button>
+            <Button asChild>
+              <Link to="/add"><Plus className="h-4 w-4" /> Add Word</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
