@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import Header from "@/components/Header";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,9 +90,7 @@ const AddWord = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-paper">
-      <Header />
-      <main className="container py-8 sm:py-12 max-w-2xl">
+    <main className="container py-8 sm:py-12 max-w-2xl">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="h-4 w-4" /> Back
         </Button>
@@ -171,7 +169,6 @@ const AddWord = () => {
           </div>
         </form>
       </main>
-    </div>
   );
 };
 
