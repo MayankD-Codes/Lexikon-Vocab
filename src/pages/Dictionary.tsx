@@ -1,12 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import * as XLSX from "xlsx";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, BookOpen } from "lucide-react";
+import { Search, Plus, BookOpen, Download, Upload } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+
+const EXPORT_FIELDS: (keyof Word)[] = [
+  "word", "pronunciation", "spelling", "meaning_english", "meaning_hindi",
+  "part_of_speech", "word_forms", "example_sentence", "synonyms", "antonyms", "notes",
+];
 
 type Sort = "newest" | "oldest" | "az";
 
