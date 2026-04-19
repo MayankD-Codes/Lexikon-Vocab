@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BookOpen, Plus, Library, Sparkles, Feather, Quote, Brain, ArrowRight, CheckCircle2 } from "lucide-react";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,8 +28,7 @@ const Index = () => {
   const quizUnlocked = count >= 10;
 
   return (
-    <div className="min-h-screen bg-gradient-paper">
-      <Header />
+    <>
       <main>
         {/* Hero */}
         <section className="container py-16 sm:py-24 lg:py-32">
@@ -111,7 +109,7 @@ const Index = () => {
           </div>
         </section>
       </main>
-    </div>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
-import Header from "@/components/Header";
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Input } from "@/components/ui/input";
@@ -187,9 +187,7 @@ const Dictionary = () => {
   }, [words, query, sort]);
 
   return (
-    <div className="min-h-screen bg-gradient-paper">
-      <Header />
-      <main className="container py-8 sm:py-12">
+    <main className="container py-8 sm:py-12">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Dictionary</h1>
@@ -271,7 +269,6 @@ const Dictionary = () => {
           </div>
         )}
       </main>
-    </div>
   );
 };
 

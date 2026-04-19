@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import Header from "@/components/Header";
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,7 @@ const WordDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-paper">
-      <Header />
-      <main className="container py-8 sm:py-12 max-w-3xl">
+    <main className="container py-8 sm:py-12 max-w-3xl">
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link to="/dictionary"><ArrowLeft className="h-4 w-4" /> Back to dictionary</Link>
         </Button>
@@ -129,7 +127,6 @@ const WordDetail = () => {
           </article>
         )}
       </main>
-    </div>
   );
 };
 
