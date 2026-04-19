@@ -125,9 +125,24 @@ const Dictionary = () => {
               {loading ? "Loading…" : `${words.length} word${words.length === 1 ? "" : "s"} saved`}
             </p>
           </div>
-          <Button asChild>
-            <Link to="/add"><Plus className="h-4 w-4" /> Add Word</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <Button variant="outline" onClick={handleImportClick} disabled={importing}>
+              <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Import"}
+            </Button>
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="h-4 w-4" /> Export
+            </Button>
+            <Button asChild>
+              <Link to="/add"><Plus className="h-4 w-4" /> Add Word</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
