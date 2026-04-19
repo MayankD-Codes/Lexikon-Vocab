@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BookOpen, Plus, Library, Sparkles, Feather, Quote } from "lucide-react";
+import { BookOpen, Plus, Library, Sparkles, Feather, Quote, Brain, ArrowRight, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [count, setCount] = useState<number>(0);
+  const [quizDoneToday, setQuizDoneToday] = useState<boolean>(false);
 
   useEffect(() => {
     document.title = "Lexikon — Your personal English vocabulary dictionary";
@@ -15,7 +16,17 @@ const Index = () => {
     supabase.from("words").select("*", { count: "exact", head: true }).then(({ count }) => {
       if (typeof count === "number") setCount(count);
     });
+    const today = new Date();
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    supabase
+      .from("quiz_sessions")
+      .select("completed")
+      .eq("quiz_date", iso)
+      .maybeSingle()
+      .then(({ data }) => setQuizDoneToday(!!data?.completed));
   }, []);
+
+  const quizUnlocked = count >= 10;
 
   return (
     <div className="min-h-screen bg-gradient-paper">
@@ -47,6 +58,37 @@ const Index = () => {
                 </Link>
               </Button>
             </div>
+          </div>
+        </section>
+
+        {/* Daily Quiz banner */}
+        <section className="container pb-4">
+          <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-card flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+            <div className="h-12 w-12 rounded-xl bg-gradient-warm flex items-center justify-center shadow-soft shrink-0">
+              <Brain className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="font-display text-lg sm:text-xl font-semibold">Daily Quiz</h2>
+                {quizDoneToday && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Done for today
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {!quizUnlocked
+                  ? `Add ${10 - count} more word${10 - count === 1 ? "" : "s"} to unlock your daily quiz.`
+                  : quizDoneToday
+                  ? "Great work — come back tomorrow for a fresh round."
+                  : "7 personalized questions drawn from your weakest, newest, and best-known words."}
+              </p>
+            </div>
+            <Button asChild size="lg" disabled={!quizUnlocked} variant={quizDoneToday ? "outline" : "default"}>
+              <Link to="/quiz">
+                {quizDoneToday ? "View Results" : "Start Quiz"} <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </section>
 

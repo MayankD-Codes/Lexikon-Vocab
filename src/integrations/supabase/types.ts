@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      quiz_sessions: {
+        Row: {
+          answers: Json
+          completed: boolean
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          quiz_date: string
+          score: number
+          total_questions: number
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          completed?: boolean
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          quiz_date: string
+          score?: number
+          total_questions?: number
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          completed?: boolean
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          quiz_date?: string
+          score?: number
+          total_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      word_stats: {
+        Row: {
+          correct_count: number
+          created_at: string
+          difficulty_score: number
+          id: string
+          incorrect_count: number
+          last_tested_at: string | null
+          updated_at: string
+          word_id: string
+        }
+        Insert: {
+          correct_count?: number
+          created_at?: string
+          difficulty_score?: number
+          id?: string
+          incorrect_count?: number
+          last_tested_at?: string | null
+          updated_at?: string
+          word_id: string
+        }
+        Update: {
+          correct_count?: number
+          created_at?: string
+          difficulty_score?: number
+          id?: string
+          incorrect_count?: number
+          last_tested_at?: string | null
+          updated_at?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "word_stats_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: true
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       words: {
         Row: {
           antonyms: string | null

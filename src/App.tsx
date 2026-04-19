@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AddWord from "./pages/AddWord.tsx";
 import Dictionary from "./pages/Dictionary.tsx";
 import WordDetail from "./pages/WordDetail.tsx";
+import Quiz from "./pages/Quiz.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/add" element={<AddWord />} />
             <Route path="/dictionary" element={<Dictionary />} />
             <Route path="/word/:id" element={<WordDetail />} />
+            <Route path="/quiz" element={<Quiz />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

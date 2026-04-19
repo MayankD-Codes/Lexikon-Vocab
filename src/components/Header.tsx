@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Plus, Library } from "lucide-react";
+import { BookOpen, Plus, Library, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -18,6 +18,16 @@ const Header = () => {
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
+          <Button
+            asChild
+            variant={pathname === "/quiz" ? "secondary" : "ghost"}
+            size="sm"
+          >
+            <Link to="/quiz">
+              <Brain className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Quiz</span>
+            </Link>
+          </Button>
           <Button
             asChild
             variant={pathname === "/dictionary" ? "secondary" : "ghost"}
