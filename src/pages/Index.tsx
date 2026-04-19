@@ -88,6 +88,52 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Word of the Day */}
+        {wotd && (
+          <section className="container pb-4">
+            <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-gradient-paper p-6 sm:p-8 shadow-card relative overflow-hidden">
+              <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-warm opacity-10 blur-3xl rounded-full -mr-10 -mt-10" />
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Word of the Day</span>
+              </div>
+              <div className="flex flex-wrap items-baseline gap-3 mb-2">
+                <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">{wotd.word}</h2>
+                {wotd.pronunciation && (
+                  <span className="text-base text-muted-foreground italic">/{wotd.pronunciation}/</span>
+                )}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => speak(wotd.word)}
+                  aria-label="Pronounce word"
+                >
+                  <Volume2 className="h-4 w-4" />
+                </Button>
+              </div>
+              {wotd.part_of_speech && (
+                <Badge variant="secondary" className="mb-3">{wotd.part_of_speech}</Badge>
+              )}
+              {wotd.meaning_english && (
+                <p className="text-base sm:text-lg text-foreground/90 leading-relaxed mb-3">
+                  {wotd.meaning_english}
+                </p>
+              )}
+              {wotd.example_sentence && (
+                <blockquote className="border-l-2 border-primary/40 pl-4 italic text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
+                  "{wotd.example_sentence}"
+                </blockquote>
+              )}
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/word/${wotd.id}`}>
+                  View full entry <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </section>
+        )}
+
         {/* Daily Quiz banner */}
         <section className="container pb-4">
           <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-card flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
