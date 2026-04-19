@@ -267,6 +267,7 @@ const Dictionary = () => {
               </Link>
             ))}
           </div>
+        )}
       </main>
   );
 };
