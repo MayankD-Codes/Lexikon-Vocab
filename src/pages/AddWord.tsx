@@ -66,9 +66,19 @@ const AddWord = () => {
       return;
     }
     setSaving(true);
-    const payload = Object.fromEntries(
-      Object.entries(parsed.data).map(([k, v]) => [k, v && v.length ? v : null])
+    const data = parsed.data;
+    const posCombined = POS_FIELDS
+      .map(({ key, label }) => {
+        const v = (data[key] ?? "").trim();
+        return v ? `${label.toLowerCase()}: ${v}` : null;
+      })
+      .filter(Boolean)
+      .join("; ");
+    const { pos_noun, pos_verb, pos_adjective, pos_adverb, pos_pronoun, pos_preposition, pos_conjunction, pos_interjection, ...rest } = data;
+    const payload: Record<string, string | null> = Object.fromEntries(
+      Object.entries(rest).map(([k, v]) => [k, v && v.length ? v : null])
     );
+    payload.part_of_speech = posCombined.length ? posCombined : null;
     const { error } = await supabase.from("words").insert(payload as any);
     setSaving(false);
     if (error) {
