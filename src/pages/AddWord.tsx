@@ -105,20 +105,22 @@ const AddWord = () => {
               <Label htmlFor="spelling">Spelling</Label>
               <Input id="spelling" value={form.spelling} onChange={(e) => set("spelling", e.target.value)} placeholder="e-phem-er-al" maxLength={150} />
             </div>
-            <div>
-              <Label htmlFor="part_of_speech">Part of speech</Label>
-              <Select value={form.part_of_speech} onValueChange={(v) => set("part_of_speech", v)}>
-                <SelectTrigger id="part_of_speech"><SelectValue placeholder="Select…" /></SelectTrigger>
-                <SelectContent>
-                  {["noun", "verb", "adjective", "adverb", "pronoun", "preposition", "conjunction", "interjection"].map((p) => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
+            <div className="sm:col-span-2">
               <Label htmlFor="word_forms">Word forms</Label>
               <Input id="word_forms" value={form.word_forms} onChange={(e) => set("word_forms", e.target.value)} placeholder="noun: ephemerality" maxLength={500} />
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-2 block">Part of speech</Label>
+            <p className="text-xs text-muted-foreground mb-3">Fill in the form(s) the word takes for each applicable type.</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {POS_FIELDS.map(({ key, label }) => (
+                <div key={key}>
+                  <Label htmlFor={key} className="text-sm">{label}</Label>
+                  <Input id={key} value={form[key] ?? ""} onChange={(e) => set(key, e.target.value)} maxLength={200} />
+                </div>
+              ))}
             </div>
           </div>
 
