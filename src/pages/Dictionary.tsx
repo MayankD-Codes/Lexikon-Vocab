@@ -92,6 +92,18 @@ const Dictionary = () => {
     toast({ title: "Exported", description: `${words.length} word${words.length === 1 ? "" : "s"} exported.` });
   };
 
+  const handleDownloadTemplate = () => {
+    const sample: Record<string, string> = {};
+    TEMPLATE_HEADERS.forEach((h) => (sample[h] = ""));
+    const ws = XLSX.utils.json_to_sheet([sample], { header: TEMPLATE_HEADERS });
+    // Set reasonable column widths
+    ws["!cols"] = TEMPLATE_HEADERS.map((h) => ({ wch: Math.max(14, h.length + 2) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "lexikon-import-template.xlsx");
+    toast({ title: "Template downloaded", description: "Fill it in and upload to import." });
+  };
+
   const handleImportClick = () => fileInputRef.current?.click();
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,22 +116,43 @@ const Dictionary = () => {
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+      const posKeys = POS_PARTS.map((p) => p.toLowerCase());
+
       const payload = rows
         .map((r) => {
           const norm: Record<string, string> = {};
           Object.keys(r).forEach((k) => { norm[k.trim().toLowerCase()] = String(r[k] ?? "").trim(); });
-          const word = norm["word"];
+          const word = norm["word *"] || norm["word"];
           if (!word) return null;
           const obj: Record<string, string | null> = { word };
+
+          // Map known headers to fields
+          Object.entries(HEADER_TO_FIELD).forEach(([header, field]) => {
+            if (field === "word") return;
+            const v = norm[header];
+            if (v && !obj[field]) obj[field] = v;
+          });
+
+          // Combine per-POS columns into part_of_speech (unless already provided)
+          if (!obj.part_of_speech) {
+            const parts: string[] = [];
+            POS_PARTS.forEach((label, i) => {
+              const v = norm[posKeys[i]];
+              if (v) parts.push(`${label.toLowerCase()}: ${v}`);
+            });
+            if (parts.length) obj.part_of_speech = parts.join("; ");
+          }
+
+          // Ensure all export fields exist (null if missing)
           EXPORT_FIELDS.filter((f) => f !== "word").forEach((f) => {
-            obj[f] = norm[f] ? norm[f] : null;
+            if (!(f in obj)) obj[f] = null;
           });
           return obj;
         })
         .filter((r): r is Record<string, string | null> => r !== null);
 
       if (payload.length === 0) {
-        toast({ title: "No valid rows", description: "Make sure your file has a 'word' column.", variant: "destructive" });
+        toast({ title: "No valid rows", description: "Make sure your file has a 'Word *' column. Download the template if needed.", variant: "destructive" });
         return;
       }
 
