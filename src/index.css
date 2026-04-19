@@ -55,26 +55,50 @@
   }
 
   .dark {
-    --background: 25 20% 10%;
-    --foreground: 38 40% 95%;
-    --card: 25 20% 13%;
-    --card-foreground: 38 40% 95%;
-    --popover: 25 20% 13%;
-    --popover-foreground: 38 40% 95%;
-    --primary: 22 80% 55%;
-    --primary-foreground: 25 20% 10%;
-    --primary-glow: 18 70% 60%;
-    --secondary: 25 15% 18%;
-    --secondary-foreground: 38 40% 95%;
-    --muted: 25 15% 18%;
-    --muted-foreground: 38 20% 65%;
-    --accent: 200 50% 55%;
-    --accent-foreground: 25 20% 10%;
-    --destructive: 0 70% 50%;
+    /* Inspired by aged leather, candlelight & midnight ink */
+    --background: 25 18% 7%;
+    --foreground: 38 35% 92%;
+
+    --card: 25 16% 10%;
+    --card-foreground: 38 35% 92%;
+
+    --popover: 25 18% 9%;
+    --popover-foreground: 38 35% 92%;
+
+    --primary: 24 90% 62%;
+    --primary-foreground: 25 25% 8%;
+    --primary-glow: 30 95% 70%;
+
+    --secondary: 25 12% 15%;
+    --secondary-foreground: 38 30% 90%;
+
+    --muted: 25 10% 14%;
+    --muted-foreground: 38 15% 62%;
+
+    --accent: 195 60% 58%;
+    --accent-foreground: 25 25% 8%;
+
+    --destructive: 0 70% 55%;
     --destructive-foreground: 38 40% 95%;
-    --border: 25 15% 22%;
-    --input: 25 15% 22%;
-    --ring: 22 80% 55%;
+
+    --border: 25 12% 18%;
+    --input: 25 12% 16%;
+    --ring: 24 90% 62%;
+
+    --gradient-warm: linear-gradient(135deg, hsl(24 90% 55%), hsl(30 95% 68%));
+    --gradient-paper: linear-gradient(180deg, hsl(25 18% 7%), hsl(25 20% 5%));
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.4);
+    --shadow-elegant: 0 12px 40px -10px hsl(24 90% 50% / 0.35);
+
+    --sidebar-background: 25 18% 8%;
+    --sidebar-foreground: 38 30% 88%;
+    --sidebar-primary: 24 90% 62%;
+    --sidebar-primary-foreground: 25 25% 8%;
+    --sidebar-accent: 25 12% 14%;
+    --sidebar-accent-foreground: 38 30% 90%;
+    --sidebar-border: 25 12% 16%;
+    --sidebar-ring: 24 90% 62%;
   }
 }
 
@@ -86,6 +110,7 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11";
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
   h1, h2, h3, h4, .font-display {
     font-family: 'Fraunces', Georgia, serif;
