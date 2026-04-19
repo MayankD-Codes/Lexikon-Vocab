@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
@@ -17,7 +16,14 @@ const schema = z.object({
   spelling: z.string().trim().max(150).optional(),
   meaning_english: z.string().trim().max(1000).optional(),
   meaning_hindi: z.string().trim().max(1000).optional(),
-  part_of_speech: z.string().trim().max(50).optional(),
+  pos_noun: z.string().trim().max(200).optional(),
+  pos_verb: z.string().trim().max(200).optional(),
+  pos_adjective: z.string().trim().max(200).optional(),
+  pos_adverb: z.string().trim().max(200).optional(),
+  pos_pronoun: z.string().trim().max(200).optional(),
+  pos_preposition: z.string().trim().max(200).optional(),
+  pos_conjunction: z.string().trim().max(200).optional(),
+  pos_interjection: z.string().trim().max(200).optional(),
   word_forms: z.string().trim().max(500).optional(),
   example_sentence: z.string().trim().max(1000).optional(),
   synonyms: z.string().trim().max(500).optional(),
@@ -27,9 +33,22 @@ const schema = z.object({
 
 type FormState = z.infer<typeof schema>;
 
+const POS_FIELDS: { key: keyof FormState; label: string }[] = [
+  { key: "pos_noun", label: "Noun" },
+  { key: "pos_verb", label: "Verb" },
+  { key: "pos_adjective", label: "Adjective" },
+  { key: "pos_adverb", label: "Adverb" },
+  { key: "pos_pronoun", label: "Pronoun" },
+  { key: "pos_preposition", label: "Preposition" },
+  { key: "pos_conjunction", label: "Conjunction" },
+  { key: "pos_interjection", label: "Interjection" },
+];
+
 const initial: FormState = {
   word: "", pronunciation: "", spelling: "", meaning_english: "", meaning_hindi: "",
-  part_of_speech: "", word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
+  pos_noun: "", pos_verb: "", pos_adjective: "", pos_adverb: "",
+  pos_pronoun: "", pos_preposition: "", pos_conjunction: "", pos_interjection: "",
+  word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
 };
 
 const AddWord = () => {
