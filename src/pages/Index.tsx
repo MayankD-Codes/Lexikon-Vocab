@@ -1,12 +1,22 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BookOpen, Plus, Library, Sparkles, Feather, Quote, Brain, ArrowRight, CheckCircle2 } from "lucide-react";
+import { BookOpen, Plus, Library, Sparkles, Feather, Quote, Brain, ArrowRight, CheckCircle2, Calendar, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import type { Word } from "@/lib/types";
+
+// Deterministic daily index based on YYYY-MM-DD so all visits today show the same word
+const dayHash = (iso: string): number => {
+  let h = 0;
+  for (let i = 0; i < iso.length; i++) h = (h * 31 + iso.charCodeAt(i)) >>> 0;
+  return h;
+};
 
 const Index = () => {
   const [count, setCount] = useState<number>(0);
   const [quizDoneToday, setQuizDoneToday] = useState<boolean>(false);
+  const [wotd, setWotd] = useState<Word | null>(null);
 
   useEffect(() => {
     document.title = "Lexikon — Your personal English vocabulary dictionary";
@@ -23,7 +33,26 @@ const Index = () => {
       .eq("quiz_date", iso)
       .maybeSingle()
       .then(({ data }) => setQuizDoneToday(!!data?.completed));
+
+    // Word of the Day — deterministic pick across the user's dictionary
+    supabase
+      .from("words")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (!data || data.length === 0) return;
+        const idx = dayHash(iso) % data.length;
+        setWotd(data[idx] as Word);
+      });
   }, []);
+
+  const speak = (text: string) => {
+    if (!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  };
 
   const quizUnlocked = count >= 10;
 
