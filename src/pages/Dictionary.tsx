@@ -205,6 +205,9 @@ const Dictionary = () => {
               onChange={handleImportFile}
               className="hidden"
             />
+            <Button variant="outline" onClick={handleDownloadTemplate}>
+              <FileDown className="h-4 w-4" /> Template
+            </Button>
             <Button variant="outline" onClick={handleImportClick} disabled={importing}>
               <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Import"}
             </Button>
