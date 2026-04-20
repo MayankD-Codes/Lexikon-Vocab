@@ -12,6 +12,7 @@ import {
   Sparkles,
   AlertTriangle,
   Library,
+  User,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -25,7 +26,9 @@ import {
   Bar,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Word } from "@/lib/types";
 import { todayISO } from "@/lib/quiz";
 
