@@ -6,6 +6,7 @@ import type { Word } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -33,7 +34,6 @@ const WordDetail = () => {
       const { data, error } = await supabase.from("words").select("*").eq("id", id).maybeSingle();
       if (error) toast.error(error.message);
       setWord((data as Word) ?? null);
-      if (data) document.title = `${(data as Word).word} — Lexikon`;
       setLoading(false);
     })();
   }, [id]);
@@ -54,7 +54,18 @@ const WordDetail = () => {
   };
 
   return (
-    <main className="container py-8 sm:py-12 max-w-3xl">
+    <main className="container py-6 sm:py-12 max-w-3xl">
+        {word && (
+          <SEO
+            title={`${word.word} — Lexikon`}
+            description={
+              word.meaning_english
+                ? `Meaning of ${word.word}: ${word.meaning_english.slice(0, 140)}`
+                : `${word.word} — saved in your personal Lexikon dictionary.`
+            }
+            noindex
+          />
+        )}
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link to="/dictionary"><ArrowLeft className="h-4 w-4" /> Back to dictionary</Link>
         </Button>
@@ -63,15 +74,15 @@ const WordDetail = () => {
           <p className="text-muted-foreground">Loading…</p>
         ) : !word ? (
           <div className="text-center py-20">
-            <h2 className="font-display text-3xl font-semibold mb-2">Word not found</h2>
+            <h2 className="font-display text-2xl sm:text-3xl font-semibold mb-2">Word not found</h2>
             <Button asChild className="mt-4"><Link to="/dictionary">Back to dictionary</Link></Button>
           </div>
         ) : (
           <article className="bg-card rounded-2xl shadow-card border border-border/60 overflow-hidden">
-            <header className="p-6 sm:p-10 border-b border-border/60 bg-gradient-to-br from-secondary/40 to-transparent">
+            <header className="p-5 sm:p-8 md:p-10 border-b border-border/60 bg-gradient-to-br from-secondary/40 to-transparent">
               <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-tight">{word.word}</h1>
+                <div className="min-w-0">
+                  <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight break-words">{word.word}</h1>
                   <div className="flex items-center gap-3 mt-3 flex-wrap">
                     {word.pronunciation && (
                       <span className="font-mono text-muted-foreground">{word.pronunciation}</span>
@@ -102,7 +113,7 @@ const WordDetail = () => {
               </div>
             </header>
 
-            <div className="p-6 sm:p-10 space-y-6">
+            <div className="p-5 sm:p-8 md:p-10 space-y-6">
               <Field label="Meaning (English)" value={word.meaning_english} />
               <Field label="Meaning (Hindi)" value={word.meaning_hindi} />
               {word.example_sentence && (

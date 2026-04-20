@@ -69,11 +69,11 @@ const Index = () => {
               <Sparkles className="h-3 w-3" />
               {count > 0 ? `${count} word${count === 1 ? "" : "s"} in your collection` : "Start your vocabulary journey"}
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight">
               Your personal
               <span className="block italic text-primary">English dictionary.</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Capture every new word you discover — with meaning, pronunciation, examples and personal notes. Build a vocabulary that's truly yours.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">

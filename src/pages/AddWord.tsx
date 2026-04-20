@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
+import SEO from "@/components/SEO";
 
 const schema = z.object({
   word: z.string().trim().min(1, "Word is required").max(100),
@@ -97,16 +98,21 @@ const AddWord = () => {
   };
 
   return (
-    <main className="container py-8 sm:py-12 max-w-2xl">
+    <main className="container py-6 sm:py-12 max-w-2xl">
+        <SEO
+          title="Add a Word — Lexikon"
+          description="Add a new word to your personal Lexikon dictionary with meaning, pronunciation, examples, synonyms and notes."
+          noindex
+        />
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="h-4 w-4" /> Back
         </Button>
-        <div className="mb-8">
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Add a new word</h1>
-          <p className="text-muted-foreground mt-2">Capture everything you want to remember about it.</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">Add a new word</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">Capture everything you want to remember about it.</p>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-5 bg-card rounded-2xl p-6 sm:p-8 shadow-card border border-border/60">
+        <form onSubmit={onSubmit} className="space-y-5 bg-card rounded-2xl p-4 sm:p-6 md:p-8 shadow-card border border-border/60">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <Label htmlFor="word">Word *</Label>
