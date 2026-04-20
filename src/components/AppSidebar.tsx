@@ -32,12 +32,20 @@ export const AppSidebar = () => {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const handleNavClick = () => {
     if (state === "expanded") {
       toggleSidebar();
     }
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+  };
+
+  const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
 
   const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
     <SidebarMenuItem key={item.title}>
@@ -88,6 +96,37 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={user?.email ?? "Account"}
+              className="flex items-center gap-3 cursor-default hover:bg-transparent"
+            >
+              <Avatar className="h-7 w-7 shrink-0">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              {!collapsed && (
+                <span className="truncate text-xs text-sidebar-foreground/80">
+                  {user?.email}
+                </span>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              tooltip="Sign out"
+              className="hover:bg-sidebar-accent/60"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              {!collapsed && <span>Sign out</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 };
