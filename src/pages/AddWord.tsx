@@ -56,8 +56,41 @@ const AddWord = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [saving, setSaving] = useState(false);
+  const [askingLexi, setAskingLexi] = useState(false);
 
   const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const askLexi = async () => {
+    const w = form.word.trim();
+    if (!w) {
+      toast.error("Type a word first, then ask Lexi.");
+      return;
+    }
+    setAskingLexi(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setForm((f) => ({
+        ...f,
+        pronunciation: data.pronunciation ?? f.pronunciation,
+        spelling: data.spelling ?? f.spelling,
+        meaning_english: data.meaning_english ?? f.meaning_english,
+        meaning_hindi: data.meaning_hindi ?? f.meaning_hindi,
+        word_forms: data.word_forms ?? f.word_forms,
+        example_sentence: data.example_sentence ?? f.example_sentence,
+        synonyms: data.synonyms ?? f.synonyms,
+        antonyms: data.antonyms ?? f.antonyms,
+        // map combined POS string into the matching POS field
+        ...mapPosString(data.part_of_speech, w),
+      }));
+      toast.success("Lexi filled it in. Review before saving.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Lexi could not fetch this word");
+    } finally {
+      setAskingLexi(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
