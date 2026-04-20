@@ -49,6 +49,11 @@ interface WordStat {
 
 const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
 
+interface Profile {
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
 const startOfDayUTC = (d: Date) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -77,15 +82,28 @@ const computeStreak = (sessions: QuizSession[]): number => {
 };
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [words, setWords] = useState<Word[]>([]);
   const [stats, setStats] = useState<WordStat[]>([]);
   const [sessions, setSessions] = useState<QuizSession[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Dashboard — Lexikon";
     void load();
+    void loadProfile();
   }, []);
+
+  const loadProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", user.id)
+      .single();
+    if (data) setProfile(data as Profile);
+  };
 
   const load = async () => {
     setLoading(true);
