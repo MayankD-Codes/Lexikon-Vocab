@@ -146,19 +146,24 @@ const Quiz = () => {
       };
     });
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     await Promise.all([
       supabase.from("word_stats").upsert(upserts, { onConflict: "word_id" }),
-      supabase.from("quiz_sessions").upsert(
-        {
-          quiz_date: todayISO(),
-          score,
-          total_questions: answers.length,
-          duration_seconds: duration,
-          answers: answers as unknown as never,
-          completed: true,
-        },
-        { onConflict: "quiz_date" }
-      ),
+      user
+        ? supabase.from("quiz_sessions").upsert(
+            {
+              user_id: user.id,
+              quiz_date: todayISO(),
+              score,
+              total_questions: answers.length,
+              duration_seconds: duration,
+              answers: answers as unknown as never,
+              completed: true,
+            },
+            { onConflict: "user_id,quiz_date" }
+          )
+        : Promise.resolve(),
     ]);
 
     setTodaysSession({ score, total: answers.length, duration });

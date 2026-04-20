@@ -79,7 +79,14 @@ const AddWord = () => {
       Object.entries(rest).map(([k, v]) => [k, v && v.length ? v : null])
     );
     payload.part_of_speech = posCombined.length ? posCombined : null;
-    const { error } = await supabase.from("words").insert(payload as any);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("You must be signed in");
+      setSaving(false);
+      return;
+    }
+    payload.user_id = user.id;
+    const { error } = await supabase.from("words").insert(payload as never);
     setSaving(false);
     if (error) {
       toast.error(error.message);
