@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2, Volume2 } from "lucide-react";
+import { ArrowLeft, Trash2, Volume2, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { lexiExplainStream } from "@/lib/lexi";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
