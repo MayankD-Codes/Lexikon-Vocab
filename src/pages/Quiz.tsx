@@ -14,6 +14,7 @@ import {
   type QuizQuestion,
   type WordStat,
 } from "@/lib/quiz";
+import SEO from "@/components/SEO";
 
 type Phase = "loading" | "intro" | "blocked" | "active" | "results" | "already_done";
 
@@ -32,7 +33,6 @@ const Quiz = () => {
   const [todaysSession, setTodaysSession] = useState<{ score: number; total: number; duration: number } | null>(null);
 
   useEffect(() => {
-    document.title = "Daily Quiz — Lexikon";
     void load();
   }, []);
 
@@ -172,7 +172,12 @@ const Quiz = () => {
   const wordById = useMemo(() => new Map(words.map((w) => [w.id, w])), [words]);
 
   return (
-    <main className="container py-10 sm:py-14 max-w-2xl">
+    <main className="container py-6 sm:py-14 max-w-2xl">
+      <SEO
+        title="Daily Quiz — Lexikon"
+        description="Take a personalized 7-question daily quiz on words from your Lexikon dictionary to reinforce memory."
+        noindex
+      />
       {phase === "loading" && (
         <div className="text-center text-muted-foreground py-20">Loading your quiz…</div>
       )}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/SEO";
 
 const credSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -45,9 +46,7 @@ const Auth = () => {
     else toast.success("Check your email for a reset link");
   };
 
-  useEffect(() => {
-    document.title = mode === "signin" ? "Sign in — Lexikon" : "Create account — Lexikon";
-  }, [mode]);
+  // SEO handled via <SEO /> below
 
   if (!loading && user) return <Navigate to={from} replace />;
 
@@ -94,6 +93,10 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-paper flex flex-col">
+      <SEO
+        title={mode === "signin" ? "Sign in — Lexikon" : "Create your account — Lexikon"}
+        description="Sign in or create a free Lexikon account to start building your personal English vocabulary dictionary."
+      />
       <header className="container py-6">
         <Link to="/" className="inline-flex items-center gap-2">
           <div className="h-9 w-9 rounded-lg bg-gradient-warm flex items-center justify-center shadow-soft">
@@ -103,8 +106,8 @@ const Auth = () => {
         </Link>
       </header>
 
-      <main className="flex-1 container flex items-center justify-center pb-16">
-        <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-card">
+      <main className="flex-1 container flex items-center justify-center pb-10 sm:pb-16">
+        <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card p-5 sm:p-8 shadow-card">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-center mb-1">
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>

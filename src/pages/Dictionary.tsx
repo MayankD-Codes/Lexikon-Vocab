@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, BookOpen, Download, Upload, FileDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
 
 const EXPORT_FIELDS: (keyof Word)[] = [
   "word", "pronunciation", "spelling", "meaning_english", "meaning_hindi",
@@ -71,7 +72,6 @@ const Dictionary = () => {
   };
 
   useEffect(() => {
-    document.title = "Dictionary — Lexikon";
     loadWords();
   }, []);
 
@@ -192,11 +192,16 @@ const Dictionary = () => {
   }, [words, query, sort]);
 
   return (
-    <main className="container py-8 sm:py-12">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <main className="container py-6 sm:py-12">
+        <SEO
+          title="Dictionary — Lexikon"
+          description="Browse, search, import and export your personal vocabulary collection in Lexikon."
+          noindex
+        />
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Dictionary</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">Dictionary</h1>
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               {loading ? "Loading…" : `${words.length} word${words.length === 1 ? "" : "s"} saved`}
             </p>
           </div>
@@ -208,16 +213,16 @@ const Dictionary = () => {
               onChange={handleImportFile}
               className="hidden"
             />
-            <Button variant="outline" onClick={handleDownloadTemplate}>
-              <FileDown className="h-4 w-4" /> Template
+            <Button variant="outline" size="sm" className="sm:h-10" onClick={handleDownloadTemplate}>
+              <FileDown className="h-4 w-4" /> <span className="hidden xs:inline">Template</span>
             </Button>
-            <Button variant="outline" onClick={handleImportClick} disabled={importing}>
+            <Button variant="outline" size="sm" className="sm:h-10" onClick={handleImportClick} disabled={importing}>
               <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Import"}
             </Button>
-            <Button variant="outline" onClick={handleExport}>
+            <Button variant="outline" size="sm" className="sm:h-10" onClick={handleExport}>
               <Download className="h-4 w-4" /> Export
             </Button>
-            <Button asChild>
+            <Button asChild size="sm" className="sm:h-10">
               <Link to="/add"><Plus className="h-4 w-4" /> Add Word</Link>
             </Button>
           </div>

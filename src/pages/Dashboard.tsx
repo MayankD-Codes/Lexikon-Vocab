@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Word } from "@/lib/types";
 import { todayISO } from "@/lib/quiz";
+import SEO from "@/components/SEO";
 
 interface QuizSession {
   quiz_date: string;
@@ -90,7 +91,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "Dashboard — Lexikon";
     void load();
     void loadProfile();
   }, []);
@@ -223,26 +223,31 @@ const Dashboard = () => {
   const avatarUrl = profile?.avatar_url;
 
   return (
-    <div className="container py-8 sm:py-10 space-y-6 max-w-6xl">
+    <div className="container py-6 sm:py-10 space-y-6 max-w-6xl">
+      <SEO
+        title="Dashboard — Lexikon"
+        description="Track your vocabulary progress: total words, quiz streak, accuracy trends, mastery breakdown and weakest words."
+        noindex
+      />
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <Avatar className="h-12 w-12 sm:h-14 sm:w-14 ring-2 ring-primary/20 shrink-0">
             <AvatarImage src={avatarUrl || undefined} alt={displayName} />
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
               {displayName[0]?.toUpperCase() || <User className="h-6 w-6" />}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight truncate">
               Welcome back, {displayName}
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               A quick look at your vocabulary progress.
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button asChild variant="outline">
             <Link to="/add">
               <Plus className="h-4 w-4" /> Add Word

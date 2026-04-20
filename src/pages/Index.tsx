@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
+import SEO from "@/components/SEO";
 
 // Deterministic daily index based on YYYY-MM-DD so all visits today show the same word
 const dayHash = (iso: string): number => {
@@ -19,9 +20,6 @@ const Index = () => {
   const [wotd, setWotd] = useState<Word | null>(null);
 
   useEffect(() => {
-    document.title = "Lexikon — Your personal English vocabulary dictionary";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Build your personal English vocabulary, one word at a time. Save meanings, pronunciation, examples, synonyms and more.");
     supabase.from("words").select("*", { count: "exact", head: true }).then(({ count }) => {
       if (typeof count === "number") setCount(count);
     });
@@ -58,19 +56,24 @@ const Index = () => {
 
   return (
     <>
+      <SEO
+        title="Lexikon — Your Personal English Vocabulary Dictionary"
+        description="Build your personal English vocabulary, one word at a time. Save meanings, pronunciation, examples, synonyms and take a daily quiz to remember them."
+        path="/"
+      />
       <main>
         {/* Hero */}
-        <section className="container py-16 sm:py-24 lg:py-32">
+        <section className="container py-12 sm:py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium mb-6">
               <Sparkles className="h-3 w-3" />
               {count > 0 ? `${count} word${count === 1 ? "" : "s"} in your collection` : "Start your vocabulary journey"}
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight">
               Your personal
               <span className="block italic text-primary">English dictionary.</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Capture every new word you discover — with meaning, pronunciation, examples and personal notes. Build a vocabulary that's truly yours.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/SEO";
 
 const nameSchema = z
   .string()
@@ -28,9 +29,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    document.title = "Profile — Lexikon";
-  }, []);
+  // SEO handled via <SEO /> below
 
   useEffect(() => {
     if (!user) return;
@@ -122,9 +121,14 @@ const Profile = () => {
     (displayName || user?.email || "?").trim().slice(0, 2).toUpperCase();
 
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container max-w-2xl py-6 sm:py-8">
+      <SEO
+        title="Profile — Lexikon"
+        description="Manage your Lexikon profile: update your display name and avatar."
+        noindex
+      />
       <div className="mb-6">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Profile</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Manage how you appear across Lexikon.
         </p>
