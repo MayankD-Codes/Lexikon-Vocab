@@ -112,6 +112,11 @@ const Dictionary = () => {
     if (!file) return;
     setImporting(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Not signed in", description: "Please sign in to import.", variant: "destructive" });
+        return;
+      }
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
@@ -124,7 +129,7 @@ const Dictionary = () => {
           Object.keys(r).forEach((k) => { norm[k.trim().toLowerCase()] = String(r[k] ?? "").trim(); });
           const word = norm["word *"] || norm["word"];
           if (!word) return null;
-          const obj: Record<string, string | null> = { word };
+          const obj: Record<string, string | null> = { word, user_id: user.id };
 
           // Map known headers to fields
           Object.entries(HEADER_TO_FIELD).forEach(([header, field]) => {

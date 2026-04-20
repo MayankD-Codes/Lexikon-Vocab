@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       quiz_sessions: {
         Row: {
           answers: Json
@@ -25,6 +52,7 @@ export type Database = {
           score: number
           total_questions: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           answers?: Json
@@ -36,6 +64,7 @@ export type Database = {
           score?: number
           total_questions?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           answers?: Json
@@ -47,6 +76,7 @@ export type Database = {
           score?: number
           total_questions?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -105,6 +135,7 @@ export type Database = {
           spelling: string | null
           synonyms: string | null
           updated_at: string
+          user_id: string | null
           word: string
           word_forms: string | null
         }
@@ -121,6 +152,7 @@ export type Database = {
           spelling?: string | null
           synonyms?: string | null
           updated_at?: string
+          user_id?: string | null
           word: string
           word_forms?: string | null
         }
@@ -137,6 +169,7 @@ export type Database = {
           spelling?: string | null
           synonyms?: string | null
           updated_at?: string
+          user_id?: string | null
           word?: string
           word_forms?: string | null
         }

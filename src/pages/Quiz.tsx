@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Brain, CheckCircle2, XCircle, ArrowRight, RotateCcw, Library, Sparkles, Trophy, Clock } from "lucide-react";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,19 +145,24 @@ const Quiz = () => {
       };
     });
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     await Promise.all([
       supabase.from("word_stats").upsert(upserts, { onConflict: "word_id" }),
-      supabase.from("quiz_sessions").upsert(
-        {
-          quiz_date: todayISO(),
-          score,
-          total_questions: answers.length,
-          duration_seconds: duration,
-          answers: answers as unknown as never,
-          completed: true,
-        },
-        { onConflict: "quiz_date" }
-      ),
+      user
+        ? supabase.from("quiz_sessions").upsert(
+            {
+              user_id: user.id,
+              quiz_date: todayISO(),
+              score,
+              total_questions: answers.length,
+              duration_seconds: duration,
+              answers: answers as unknown as never,
+              completed: true,
+            },
+            { onConflict: "user_id,quiz_date" }
+          )
+        : Promise.resolve(),
     ]);
 
     setTodaysSession({ score, total: answers.length, duration });
@@ -168,101 +172,98 @@ const Quiz = () => {
   const wordById = useMemo(() => new Map(words.map((w) => [w.id, w])), [words]);
 
   return (
-    <div className="min-h-screen bg-gradient-paper">
-      <Header />
-      <main className="container py-10 sm:py-14 max-w-2xl">
-        {phase === "loading" && (
-          <div className="text-center text-muted-foreground py-20">Loading your quiz…</div>
-        )}
+    <main className="container py-10 sm:py-14 max-w-2xl">
+      {phase === "loading" && (
+        <div className="text-center text-muted-foreground py-20">Loading your quiz…</div>
+      )}
 
-        {phase === "blocked" && (
-          <div className="rounded-2xl bg-card border border-border/60 p-8 sm:p-12 shadow-card text-center">
-            <div className="h-14 w-14 rounded-2xl bg-secondary mx-auto flex items-center justify-center mb-5">
-              <Brain className="h-7 w-7 text-primary" />
-            </div>
-            <h1 className="font-display text-2xl sm:text-3xl font-semibold mb-3">
-              Add a few more words first
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              You need at least <span className="font-semibold text-foreground">{MIN_WORDS_REQUIRED} words</span> with
-              meanings in your dictionary before the daily quiz unlocks. You currently have{" "}
-              <span className="font-semibold text-foreground">{words.length}</span>.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg">
-                <Link to="/add">Add a Word</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/dictionary">
-                  <Library className="h-4 w-4" /> Browse Dictionary
-                </Link>
-              </Button>
-            </div>
+      {phase === "blocked" && (
+        <div className="rounded-2xl bg-card border border-border/60 p-8 sm:p-12 shadow-card text-center">
+          <div className="h-14 w-14 rounded-2xl bg-secondary mx-auto flex items-center justify-center mb-5">
+            <Brain className="h-7 w-7 text-primary" />
           </div>
-        )}
-
-        {phase === "already_done" && todaysSession && (
-          <ResultsCard
-            score={todaysSession.score}
-            total={todaysSession.total}
-            duration={todaysSession.duration}
-            answers={[]}
-            wordById={wordById}
-            alreadyDone
-            onReview={() => navigate("/dictionary")}
-          />
-        )}
-
-        {phase === "intro" && (
-          <div className="rounded-2xl bg-card border border-border/60 p-8 sm:p-12 shadow-card text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium mb-6">
-              <Sparkles className="h-3 w-3" /> Daily Quiz
-            </div>
-            <div className="h-16 w-16 rounded-2xl bg-gradient-warm mx-auto flex items-center justify-center shadow-elegant mb-5">
-              <Brain className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-3">
-              Ready to test yourself?
-            </h1>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              7 personalized questions drawn from your weakest, newest, and best-known words.
-              Takes about 5 minutes.
-            </p>
-            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-8 text-sm">
-              <Stat label="Questions" value="7" />
-              <Stat label="~Time" value="5 min" />
-              <Stat label="Words" value={String(words.length)} />
-            </div>
-            <Button size="lg" className="text-base h-12 px-8 shadow-elegant" onClick={startQuiz}>
-              Start Quiz <ArrowRight className="h-4 w-4" />
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold mb-3">
+            Add a few more words first
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            You need at least <span className="font-semibold text-foreground">{MIN_WORDS_REQUIRED} words</span> with
+            meanings in your dictionary before the daily quiz unlocks. You currently have{" "}
+            <span className="font-semibold text-foreground">{words.length}</span>.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg">
+              <Link to="/add">Add a Word</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/dictionary">
+                <Library className="h-4 w-4" /> Browse Dictionary
+              </Link>
             </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        {phase === "active" && questions[currentIdx] && (
-          <ActiveQuestion
-            question={questions[currentIdx]}
-            index={currentIdx}
-            total={questions.length}
-            selected={selected}
-            answered={answered}
-            onSelect={handleSelect}
-            onNext={handleNext}
-          />
-        )}
+      {phase === "already_done" && todaysSession && (
+        <ResultsCard
+          score={todaysSession.score}
+          total={todaysSession.total}
+          duration={todaysSession.duration}
+          answers={[]}
+          wordById={wordById}
+          alreadyDone
+          onReview={() => navigate("/dictionary")}
+        />
+      )}
 
-        {phase === "results" && todaysSession && (
-          <ResultsCard
-            score={todaysSession.score}
-            total={todaysSession.total}
-            duration={todaysSession.duration}
-            answers={answers}
-            wordById={wordById}
-            onReview={() => navigate("/dictionary")}
-          />
-        )}
-      </main>
-    </div>
+      {phase === "intro" && (
+        <div className="rounded-2xl bg-card border border-border/60 p-8 sm:p-12 shadow-card text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium mb-6">
+            <Sparkles className="h-3 w-3" /> Daily Quiz
+          </div>
+          <div className="h-16 w-16 rounded-2xl bg-gradient-warm mx-auto flex items-center justify-center shadow-elegant mb-5">
+            <Brain className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-3">
+            Ready to test yourself?
+          </h1>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            7 personalized questions drawn from your weakest, newest, and best-known words.
+            Takes about 5 minutes.
+          </p>
+          <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-8 text-sm">
+            <Stat label="Questions" value="7" />
+            <Stat label="~Time" value="5 min" />
+            <Stat label="Words" value={String(words.length)} />
+          </div>
+          <Button size="lg" className="text-base h-12 px-8 shadow-elegant" onClick={startQuiz}>
+            Start Quiz <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {phase === "active" && questions[currentIdx] && (
+        <ActiveQuestion
+          question={questions[currentIdx]}
+          index={currentIdx}
+          total={questions.length}
+          selected={selected}
+          answered={answered}
+          onSelect={handleSelect}
+          onNext={handleNext}
+        />
+      )}
+
+      {phase === "results" && todaysSession && (
+        <ResultsCard
+          score={todaysSession.score}
+          total={todaysSession.total}
+          duration={todaysSession.duration}
+          answers={answers}
+          wordById={wordById}
+          onReview={() => navigate("/dictionary")}
+        />
+      )}
+    </main>
   );
 };
 
