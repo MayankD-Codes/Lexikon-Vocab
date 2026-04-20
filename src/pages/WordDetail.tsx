@@ -29,6 +29,23 @@ const WordDetail = () => {
   const navigate = useNavigate();
   const [word, setWord] = useState<Word | null>(null);
   const [loading, setLoading] = useState(true);
+  const [explanation, setExplanation] = useState("");
+  const [explaining, setExplaining] = useState(false);
+
+  const askLexi = async () => {
+    if (!word || explaining) return;
+    setExplaining(true);
+    setExplanation("");
+    try {
+      await lexiExplainStream(word.word, word.notes ?? undefined, {
+        onDelta: (chunk) => setExplanation((s) => s + chunk),
+        onDone: () => setExplaining(false),
+      });
+    } catch (e) {
+      setExplaining(false);
+      toast.error(e instanceof Error ? e.message : "Lexi could not explain this word");
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
