@@ -12,6 +12,7 @@ import {
   Sparkles,
   AlertTriangle,
   Library,
+  User,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -25,7 +26,9 @@ import {
   Bar,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Word } from "@/lib/types";
 import { todayISO } from "@/lib/quiz";
 
@@ -45,6 +48,11 @@ interface WordStat {
 }
 
 const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
+
+interface Profile {
+  display_name: string | null;
+  avatar_url: string | null;
+}
 
 const startOfDayUTC = (d: Date) => {
   const x = new Date(d);
@@ -74,15 +82,28 @@ const computeStreak = (sessions: QuizSession[]): number => {
 };
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [words, setWords] = useState<Word[]>([]);
   const [stats, setStats] = useState<WordStat[]>([]);
   const [sessions, setSessions] = useState<QuizSession[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Dashboard — Lexikon";
     void load();
+    void loadProfile();
   }, []);
+
+  const loadProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", user.id)
+      .single();
+    if (data) setProfile(data as Profile);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -198,17 +219,28 @@ const Dashboard = () => {
     return <div className="container py-12 text-center text-muted-foreground">Loading dashboard…</div>;
   }
 
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "Learner";
+  const avatarUrl = profile?.avatar_url;
+
   return (
     <div className="container py-8 sm:py-10 space-y-6 max-w-6xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            A quick look at your vocabulary progress.
-          </p>
+        <div className="flex items-center gap-4">
+          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
+            <AvatarImage src={avatarUrl || undefined} alt={displayName} />
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+              {displayName[0]?.toUpperCase() || <User className="h-6 w-6" />}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+              Welcome back, {displayName}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              A quick look at your vocabulary progress.
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
