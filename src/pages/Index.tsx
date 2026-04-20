@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
+import SEO from "@/components/SEO";
 
 // Deterministic daily index based on YYYY-MM-DD so all visits today show the same word
 const dayHash = (iso: string): number => {
@@ -19,9 +20,6 @@ const Index = () => {
   const [wotd, setWotd] = useState<Word | null>(null);
 
   useEffect(() => {
-    document.title = "Lexikon — Your personal English vocabulary dictionary";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Build your personal English vocabulary, one word at a time. Save meanings, pronunciation, examples, synonyms and more.");
     supabase.from("words").select("*", { count: "exact", head: true }).then(({ count }) => {
       if (typeof count === "number") setCount(count);
     });
@@ -58,9 +56,14 @@ const Index = () => {
 
   return (
     <>
+      <SEO
+        title="Lexikon — Your Personal English Vocabulary Dictionary"
+        description="Build your personal English vocabulary, one word at a time. Save meanings, pronunciation, examples, synonyms and take a daily quiz to remember them."
+        path="/"
+      />
       <main>
         {/* Hero */}
-        <section className="container py-16 sm:py-24 lg:py-32">
+        <section className="container py-12 sm:py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium mb-6">
               <Sparkles className="h-3 w-3" />
