@@ -52,6 +52,28 @@ const initial: FormState = {
   word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
 };
 
+// Map AI-returned part-of-speech string (e.g. "noun, verb") into the matching
+// POS form field, using the word itself as the default form when none is given.
+const mapPosString = (pos: string | undefined, word: string): Partial<FormState> => {
+  if (!pos) return {};
+  const out: Partial<FormState> = {};
+  const lower = pos.toLowerCase();
+  const map: Record<string, keyof FormState> = {
+    noun: "pos_noun",
+    verb: "pos_verb",
+    adjective: "pos_adjective",
+    adverb: "pos_adverb",
+    pronoun: "pos_pronoun",
+    preposition: "pos_preposition",
+    conjunction: "pos_conjunction",
+    interjection: "pos_interjection",
+  };
+  for (const [name, key] of Object.entries(map)) {
+    if (lower.includes(name)) out[key] = word;
+  }
+  return out;
+};
+
 const AddWord = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
@@ -148,7 +170,20 @@ const AddWord = () => {
         <form onSubmit={onSubmit} className="space-y-5 bg-card rounded-2xl p-4 sm:p-6 md:p-8 shadow-card border border-border/60">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Label htmlFor="word">Word *</Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="word">Word *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={askLexi}
+                  disabled={askingLexi || !form.word.trim()}
+                  className="h-8 text-xs gap-1.5"
+                >
+                  {askingLexi ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {askingLexi ? "Asking Lexi…" : "Ask Lexi to fill"}
+                </Button>
+              </div>
               <Input id="word" value={form.word} onChange={(e) => set("word", e.target.value)} placeholder="e.g. ephemeral" required maxLength={100} className="font-display text-lg" />
             </div>
             <div>
