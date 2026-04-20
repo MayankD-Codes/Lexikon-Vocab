@@ -25,9 +25,15 @@ const libraryItems = [
 ];
 
 export const AppSidebar = () => {
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+
+  const handleNavClick = () => {
+    if (state === "expanded") {
+      toggleSidebar();
+    }
+  };
 
   const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
     <SidebarMenuItem key={item.title}>
@@ -35,6 +41,7 @@ export const AppSidebar = () => {
         <NavLink
           to={item.url}
           end={item.end}
+          onClick={handleNavClick}
           className={({ isActive }) =>
             [
               "flex items-center gap-3 rounded-md transition-colors",
