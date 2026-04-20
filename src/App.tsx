@@ -16,6 +16,7 @@ import Quiz from "./pages/Quiz.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import Profile from "./pages/Profile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/word/:id" element={<WordDetail />} />
                 <Route path="/quiz" element={<Quiz />} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
