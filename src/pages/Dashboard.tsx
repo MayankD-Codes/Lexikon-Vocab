@@ -219,17 +219,28 @@ const Dashboard = () => {
     return <div className="container py-12 text-center text-muted-foreground">Loading dashboard…</div>;
   }
 
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "Learner";
+  const avatarUrl = profile?.avatar_url;
+
   return (
     <div className="container py-8 sm:py-10 space-y-6 max-w-6xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            A quick look at your vocabulary progress.
-          </p>
+        <div className="flex items-center gap-4">
+          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
+            <AvatarImage src={avatarUrl || undefined} alt={displayName} />
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+              {displayName[0]?.toUpperCase() || <User className="h-6 w-6" />}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+              Welcome back, {displayName}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              A quick look at your vocabulary progress.
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
