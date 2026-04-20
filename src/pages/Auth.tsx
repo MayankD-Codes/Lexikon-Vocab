@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
+import PasswordStrength from "@/components/PasswordStrength";
 
 const credSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -132,6 +133,7 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {mode === "signup" && <PasswordStrength password={password} />}
                 </div>
                 <Button type="submit" className="w-full h-11" disabled={busy}>
                   {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
