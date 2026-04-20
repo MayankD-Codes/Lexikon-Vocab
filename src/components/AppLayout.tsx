@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import LexiChat from "@/components/LexiChat";
 
 const titles: Record<string, string> = {
   "/": "Home",
@@ -35,6 +36,7 @@ const AppLayout = () => {
             <Outlet />
           </main>
         </div>
+        <LexiChat />
       </div>
     </SidebarProvider>
   );

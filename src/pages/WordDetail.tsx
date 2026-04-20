@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Word } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2, Volume2 } from "lucide-react";
+import { ArrowLeft, Trash2, Volume2, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { lexiExplainStream } from "@/lib/lexi";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -27,6 +29,23 @@ const WordDetail = () => {
   const navigate = useNavigate();
   const [word, setWord] = useState<Word | null>(null);
   const [loading, setLoading] = useState(true);
+  const [explanation, setExplanation] = useState("");
+  const [explaining, setExplaining] = useState(false);
+
+  const askLexi = async () => {
+    if (!word || explaining) return;
+    setExplaining(true);
+    setExplanation("");
+    try {
+      await lexiExplainStream(word.word, word.notes ?? undefined, {
+        onDelta: (chunk) => setExplanation((s) => s + chunk),
+        onDone: () => setExplaining(false),
+      });
+    } catch (e) {
+      setExplaining(false);
+      toast.error(e instanceof Error ? e.message : "Lexi could not explain this word");
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -131,6 +150,35 @@ const WordDetail = () => {
                 <Field label="Antonyms" value={word.antonyms} />
               </div>
               <Field label="Notes" value={word.notes} />
+
+              <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-full bg-gradient-warm flex items-center justify-center">
+                      <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <div className="font-display font-semibold text-sm leading-none">Ask Lexi</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Deeper meaning, etymology & usage</div>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={askLexi} disabled={explaining}>
+                    {explaining ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {explanation ? "Ask again" : "Explain this word"}
+                  </Button>
+                </div>
+                {explanation && (
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-headings:mt-3 prose-p:my-2">
+                    <ReactMarkdown>{explanation}</ReactMarkdown>
+                  </div>
+                )}
+                {explaining && !explanation && (
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Lexi is thinking…
+                  </div>
+                )}
+              </div>
+
               <div className="text-xs text-muted-foreground pt-4 border-t border-border/60">
                 Added {new Date(word.created_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
               </div>

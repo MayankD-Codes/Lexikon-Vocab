@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
 
 const schema = z.object({
@@ -52,12 +52,67 @@ const initial: FormState = {
   word_forms: "", example_sentence: "", synonyms: "", antonyms: "", notes: "",
 };
 
+// Map AI-returned part-of-speech string (e.g. "noun, verb") into the matching
+// POS form field, using the word itself as the default form when none is given.
+const mapPosString = (pos: string | undefined, word: string): Partial<FormState> => {
+  if (!pos) return {};
+  const out: Partial<FormState> = {};
+  const lower = pos.toLowerCase();
+  const map: Record<string, keyof FormState> = {
+    noun: "pos_noun",
+    verb: "pos_verb",
+    adjective: "pos_adjective",
+    adverb: "pos_adverb",
+    pronoun: "pos_pronoun",
+    preposition: "pos_preposition",
+    conjunction: "pos_conjunction",
+    interjection: "pos_interjection",
+  };
+  for (const [name, key] of Object.entries(map)) {
+    if (lower.includes(name)) out[key] = word;
+  }
+  return out;
+};
+
 const AddWord = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [saving, setSaving] = useState(false);
+  const [askingLexi, setAskingLexi] = useState(false);
 
   const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const askLexi = async () => {
+    const w = form.word.trim();
+    if (!w) {
+      toast.error("Type a word first, then ask Lexi.");
+      return;
+    }
+    setAskingLexi(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setForm((f) => ({
+        ...f,
+        pronunciation: data.pronunciation ?? f.pronunciation,
+        spelling: data.spelling ?? f.spelling,
+        meaning_english: data.meaning_english ?? f.meaning_english,
+        meaning_hindi: data.meaning_hindi ?? f.meaning_hindi,
+        word_forms: data.word_forms ?? f.word_forms,
+        example_sentence: data.example_sentence ?? f.example_sentence,
+        synonyms: data.synonyms ?? f.synonyms,
+        antonyms: data.antonyms ?? f.antonyms,
+        // map combined POS string into the matching POS field
+        ...mapPosString(data.part_of_speech, w),
+      }));
+      toast.success("Lexi filled it in. Review before saving.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Lexi could not fetch this word");
+    } finally {
+      setAskingLexi(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +170,20 @@ const AddWord = () => {
         <form onSubmit={onSubmit} className="space-y-5 bg-card rounded-2xl p-4 sm:p-6 md:p-8 shadow-card border border-border/60">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Label htmlFor="word">Word *</Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="word">Word *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={askLexi}
+                  disabled={askingLexi || !form.word.trim()}
+                  className="h-8 text-xs gap-1.5"
+                >
+                  {askingLexi ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {askingLexi ? "Asking Lexi…" : "Ask Lexi to fill"}
+                </Button>
+              </div>
               <Input id="word" value={form.word} onChange={(e) => set("word", e.target.value)} placeholder="e.g. ephemeral" required maxLength={100} className="font-display text-lg" />
             </div>
             <div>
