@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut } from "lucide-react";
 import {
@@ -14,8 +15,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const primaryItems = [
   { title: "Home", url: "/", icon: Home, end: true },
@@ -33,6 +35,30 @@ export const AppSidebar = () => {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setDisplayName(null);
+      setAvatarUrl(null);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setDisplayName(data.display_name ?? null);
+        setAvatarUrl(data.avatar_url ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, location.pathname]);
 
   const handleNavClick = () => {
     if (state === "expanded") {
@@ -45,7 +71,8 @@ export const AppSidebar = () => {
     toast.success("Signed out");
   };
 
-  const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
+  const label = displayName || user?.email || "Account";
+  const initials = (displayName || user?.email || "?").trim().slice(0, 2).toUpperCase();
 
   const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
     <SidebarMenuItem key={item.title}>
@@ -99,20 +126,31 @@ export const AppSidebar = () => {
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip={user?.email ?? "Account"}
-              className="flex items-center gap-3 cursor-default hover:bg-transparent"
-            >
-              <Avatar className="h-7 w-7 shrink-0">
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              {!collapsed && (
-                <span className="truncate text-xs text-sidebar-foreground/80">
-                  {user?.email}
-                </span>
-              )}
+            <SidebarMenuButton asChild tooltip={label}>
+              <NavLink
+                to="/profile"
+                onClick={handleNavClick}
+                className={({ isActive }) =>
+                  [
+                    "flex items-center gap-3 rounded-md transition-colors",
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      : "hover:bg-sidebar-accent/60",
+                  ].join(" ")
+                }
+              >
+                <Avatar className="h-7 w-7 shrink-0">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={label} />}
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                {!collapsed && (
+                  <span className="truncate text-xs text-sidebar-foreground/80">
+                    {label}
+                  </span>
+                )}
+              </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
