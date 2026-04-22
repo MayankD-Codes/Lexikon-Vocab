@@ -193,6 +193,18 @@ export type Database = {
           words_added: number
         }[]
       }
+      get_learner_quiz_history: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: {
+          accuracy: number
+          created_at: string
+          duration_seconds: number
+          id: string
+          quiz_date: string
+          score: number
+          total_questions: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
