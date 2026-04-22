@@ -24,6 +24,7 @@ const primaryItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Daily Quiz", url: "/quiz", icon: Brain },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
+  { title: "Community", url: "/community", icon: MessagesSquare },
 ];
 
 const libraryItems = [
