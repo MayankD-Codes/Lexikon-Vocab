@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy } from "lucide-react";
+import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy, MessagesSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
