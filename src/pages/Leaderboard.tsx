@@ -176,7 +176,11 @@ const Leaderboard = () => {
                       return (
                         <TableRow
                           key={row.user_id}
-                          className={cn(isMe && "bg-primary/5 hover:bg-primary/10")}
+                          onClick={() => setSelected({ row, rank })}
+                          className={cn(
+                            "cursor-pointer",
+                            isMe && "bg-primary/5 hover:bg-primary/10",
+                          )}
                         >
                           <TableCell className="font-mono text-sm text-muted-foreground">
                             {rank}
