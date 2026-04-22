@@ -37,6 +37,7 @@ const Leaderboard = () => {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("score");
+  const [selected, setSelected] = useState<{ row: LeaderboardRow; rank: number } | null>(null);
 
   useEffect(() => {
     void load();
