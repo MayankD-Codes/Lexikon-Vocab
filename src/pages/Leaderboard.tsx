@@ -232,6 +232,16 @@ const Leaderboard = () => {
           </>
         )}
       </div>
+
+      <LearnerHistoryDialog
+        open={selected !== null}
+        onOpenChange={(open) => !open && setSelected(null)}
+        userId={selected?.row.user_id ?? null}
+        displayName={selected?.row.display_name ?? null}
+        avatarUrl={selected?.row.avatar_url ?? null}
+        rank={selected?.rank ?? null}
+        isMe={selected?.row.user_id === user?.id}
+      />
     </>
   );
 };
