@@ -47,6 +47,7 @@ const App = () => (
                 <Route path="/word/:id" element={<WordDetail />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/community" element={<Community />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
