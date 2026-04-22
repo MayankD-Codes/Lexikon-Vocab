@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import { cn } from "@/lib/utils";
+import LearnerHistoryDialog from "@/components/leaderboard/LearnerHistoryDialog";
 
 interface LeaderboardRow {
   user_id: string;
@@ -36,6 +37,7 @@ const Leaderboard = () => {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("score");
+  const [selected, setSelected] = useState<{ row: LeaderboardRow; rank: number } | null>(null);
 
   useEffect(() => {
     void load();
@@ -147,6 +149,7 @@ const Leaderboard = () => {
                     rank={idx + 1}
                     isMe={row.user_id === user?.id}
                     sortKey={sortKey}
+                    onClick={() => setSelected({ row, rank: idx + 1 })}
                   />
                 ))}
               </section>
@@ -173,7 +176,11 @@ const Leaderboard = () => {
                       return (
                         <TableRow
                           key={row.user_id}
-                          className={cn(isMe && "bg-primary/5 hover:bg-primary/10")}
+                          onClick={() => setSelected({ row, rank })}
+                          className={cn(
+                            "cursor-pointer",
+                            isMe && "bg-primary/5 hover:bg-primary/10",
+                          )}
                         >
                           <TableCell className="font-mono text-sm text-muted-foreground">
                             {rank}
@@ -225,6 +232,16 @@ const Leaderboard = () => {
           </>
         )}
       </div>
+
+      <LearnerHistoryDialog
+        open={selected !== null}
+        onOpenChange={(open) => !open && setSelected(null)}
+        userId={selected?.row.user_id ?? null}
+        displayName={selected?.row.display_name ?? null}
+        avatarUrl={selected?.row.avatar_url ?? null}
+        rank={selected?.rank ?? null}
+        isMe={selected?.row.user_id === user?.id}
+      />
     </>
   );
 };
@@ -252,11 +269,13 @@ const PodiumCard = ({
   rank,
   isMe,
   sortKey,
+  onClick,
 }: {
   row: LeaderboardRow;
   rank: number;
   isMe: boolean;
   sortKey: SortKey;
+  onClick: () => void;
 }) => {
   const style = podiumStyles[rank];
   const isFirst = rank === 1;
@@ -280,11 +299,13 @@ const PodiumCard = ({
       : "points";
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className={cn(
-        "relative rounded-xl p-4 shadow-soft transition-transform",
+        "relative text-left rounded-xl p-4 shadow-soft transition-all hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         style.ring,
-        isFirst && "sm:scale-105 sm:-translate-y-1"
+        isFirst && "sm:scale-105 sm:-translate-y-1 sm:hover:scale-[1.08]"
       )}
     >
       <div className="flex items-center justify-between mb-3">
@@ -332,7 +353,7 @@ const PodiumCard = ({
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
