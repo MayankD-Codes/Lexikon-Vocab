@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -180,6 +204,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_community_messages: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+          user_id: string
+        }[]
+      }
       get_leaderboard: {
         Args: never
         Returns: {

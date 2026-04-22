@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy } from "lucide-react";
+import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy, MessagesSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +24,7 @@ const primaryItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Daily Quiz", url: "/quiz", icon: Brain },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
+  { title: "Community", url: "/community", icon: MessagesSquare },
 ];
 
 const libraryItems = [

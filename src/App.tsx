@@ -18,6 +18,7 @@ import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
+import Community from "./pages/Community.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/word/:id" element={<WordDetail />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/community" element={<Community />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
