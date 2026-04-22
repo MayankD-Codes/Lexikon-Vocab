@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import { cn } from "@/lib/utils";
+import LearnerHistoryDialog from "@/components/leaderboard/LearnerHistoryDialog";
 
 interface LeaderboardRow {
   user_id: string;
