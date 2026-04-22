@@ -149,6 +149,7 @@ const Leaderboard = () => {
                     rank={idx + 1}
                     isMe={row.user_id === user?.id}
                     sortKey={sortKey}
+                    onClick={() => setSelected({ row, rank: idx + 1 })}
                   />
                 ))}
               </section>
