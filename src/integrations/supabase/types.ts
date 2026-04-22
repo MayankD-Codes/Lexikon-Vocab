@@ -204,6 +204,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_community_messages: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+          user_id: string
+        }[]
+      }
       get_leaderboard: {
         Args: never
         Returns: {
