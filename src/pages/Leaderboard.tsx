@@ -269,11 +269,13 @@ const PodiumCard = ({
   rank,
   isMe,
   sortKey,
+  onClick,
 }: {
   row: LeaderboardRow;
   rank: number;
   isMe: boolean;
   sortKey: SortKey;
+  onClick: () => void;
 }) => {
   const style = podiumStyles[rank];
   const isFirst = rank === 1;
@@ -297,11 +299,13 @@ const PodiumCard = ({
       : "points";
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className={cn(
-        "relative rounded-xl p-4 shadow-soft transition-transform",
+        "relative text-left rounded-xl p-4 shadow-soft transition-all hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         style.ring,
-        isFirst && "sm:scale-105 sm:-translate-y-1"
+        isFirst && "sm:scale-105 sm:-translate-y-1 sm:hover:scale-[1.08]"
       )}
     >
       <div className="flex items-center justify-between mb-3">
@@ -349,7 +353,7 @@ const PodiumCard = ({
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
