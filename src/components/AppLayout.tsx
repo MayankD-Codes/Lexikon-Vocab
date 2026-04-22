@@ -8,8 +8,10 @@ const titles: Record<string, string> = {
   "/": "Home",
   "/dashboard": "Dashboard",
   "/quiz": "Daily Quiz",
+  "/leaderboard": "Leaderboard",
   "/dictionary": "Dictionary",
   "/add": "Add Word",
+  "/profile": "Profile",
 };
 
 const AppLayout = () => {
