@@ -18,6 +18,7 @@ import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
+import Community from "./pages/Community.tsx";
 
 const queryClient = new QueryClient();
 
