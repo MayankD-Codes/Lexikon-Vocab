@@ -38,6 +38,93 @@ export type Database = {
         }
         Relationships: []
       }
+      memory_palace_anchors: {
+        Row: {
+          anchor_order: number
+          created_at: string
+          id: string
+          name: string
+          style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anchor_order?: number
+          created_at?: string
+          id?: string
+          name: string
+          style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anchor_order?: number
+          created_at?: string
+          id?: string
+          name?: string
+          style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      memory_palace_placements: {
+        Row: {
+          anchor_id: string
+          created_at: string
+          id: string
+          imagery_text: string
+          last_recalled_at: string | null
+          recall_correct: number
+          recall_incorrect: number
+          status: string
+          updated_at: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          anchor_id: string
+          created_at?: string
+          id?: string
+          imagery_text: string
+          last_recalled_at?: string | null
+          recall_correct?: number
+          recall_incorrect?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          anchor_id?: string
+          created_at?: string
+          id?: string
+          imagery_text?: string
+          last_recalled_at?: string | null
+          recall_correct?: number
+          recall_incorrect?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_palace_placements_anchor_id_fkey"
+            columns: ["anchor_id"]
+            isOneToOne: false
+            referencedRelation: "memory_palace_anchors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memory_palace_placements_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -238,6 +325,40 @@ export type Database = {
           quiz_date: string
           score: number
           total_questions: number
+        }[]
+      }
+      get_memory_palace_active: {
+        Args: { _user_id: string }
+        Returns: {
+          anchor_id: string
+          anchor_name: string
+          created_at: string
+          id: string
+          imagery_text: string
+          last_recalled_at: string
+          meaning_english: string
+          recall_correct: number
+          recall_incorrect: number
+          word: string
+          word_id: string
+        }[]
+      }
+      get_memory_palace_anchors: {
+        Args: { _user_id: string }
+        Returns: {
+          active_word_count: number
+          anchor_order: number
+          id: string
+          name: string
+          style: string
+        }[]
+      }
+      get_unplaced_words: {
+        Args: { _user_id: string }
+        Returns: {
+          id: string
+          meaning_english: string
+          word: string
         }[]
       }
     }

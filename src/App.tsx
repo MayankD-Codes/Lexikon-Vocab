@@ -19,6 +19,7 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
 import Community from "./pages/Community.tsx";
+import MemoryPalace from "./pages/MemoryPalace.tsx";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/community" element={<Community />} />
+                <Route path="/memory-palace" element={<MemoryPalace />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
