@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Sparkles, Trash2, Brain, ArrowRight, Check, X, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Sparkles,
+  Trash2,
+  Brain,
+  ArrowRight,
+  Check,
+  X,
+  Loader2,
+  Pencil,
+  ArrowUp,
+  ArrowDown,
+  Settings2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,6 +115,13 @@ const MemoryPalace = () => {
   const [recallChecked, setRecallChecked] = useState(false);
   const [recallCorrect, setRecallCorrect] = useState(false);
   const [recallQueue, setRecallQueue] = useState<ActivePlacement[]>([]);
+  // Per-session live recall results (placement id -> outcome)
+  const [recallResults, setRecallResults] = useState<Record<string, "correct" | "incorrect">>({});
+
+  // Anchor edit dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editAnchors, setEditAnchors] = useState<AnchorRow[]>([]);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const refreshAll = async () => {
     if (!user) return;
@@ -275,6 +295,7 @@ const MemoryPalace = () => {
     // Shuffle a copy
     const shuffled = [...active].sort(() => Math.random() - 0.5);
     setRecallQueue(shuffled);
+    setRecallResults({});
     setRecallIndex(0);
     setRecallGuess("");
     setRecallChecked(false);
@@ -291,6 +312,7 @@ const MemoryPalace = () => {
     const correct = guess.length > 0 && guess === truth;
     setRecallCorrect(correct);
     setRecallChecked(true);
+    setRecallResults((prev) => ({ ...prev, [current.id]: correct ? "correct" : "incorrect" }));
 
     try {
       const newCorrect = current.recall_correct + (correct ? 1 : 0);
@@ -306,6 +328,14 @@ const MemoryPalace = () => {
         })
         .eq("id", current.id);
       if (error) throw error;
+      // Reflect new counts in the in-memory queue so live progress shows updated values.
+      setRecallQueue((q) =>
+        q.map((p) =>
+          p.id === current.id
+            ? { ...p, recall_correct: newCorrect, recall_incorrect: newIncorrect }
+            : p,
+        ),
+      );
       if (shouldStabilize) {
         toast.success(`"${current.word}" is now stable in memory`);
       }
@@ -325,6 +355,63 @@ const MemoryPalace = () => {
     setRecallGuess("");
     setRecallChecked(false);
     setRecallCorrect(false);
+  };
+
+  // ---- Anchor editing & reordering ----
+  const openEditAnchors = () => {
+    setEditAnchors(anchors.map((a) => ({ ...a })));
+    setEditOpen(true);
+  };
+
+  const renameEditAnchor = (id: string, name: string) => {
+    setEditAnchors((arr) =>
+      arr.map((a) => (a.id === id ? { ...a, name: name.slice(0, 60) } : a)),
+    );
+  };
+
+  const moveEditAnchor = (id: string, dir: -1 | 1) => {
+    setEditAnchors((arr) => {
+      const idx = arr.findIndex((a) => a.id === id);
+      if (idx < 0) return arr;
+      const target = idx + dir;
+      if (target < 0 || target >= arr.length) return arr;
+      const copy = [...arr];
+      [copy[idx], copy[target]] = [copy[target], copy[idx]];
+      return copy.map((a, i) => ({ ...a, anchor_order: i }));
+    });
+  };
+
+  const saveEditAnchors = async () => {
+    if (!user) return;
+    const cleaned = editAnchors.map((a) => ({ ...a, name: a.name.trim() }));
+    if (cleaned.some((a) => !a.name)) {
+      toast.error("Anchors can't be empty");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      // Update each anchor's name + order. Capacity rules (max 2 active per anchor,
+      // max 10 active per user) are enforced by the placement validation trigger and
+      // are unaffected by renaming or reordering anchors themselves.
+      const updates = cleaned.map((a, i) =>
+        supabase
+          .from("memory_palace_anchors")
+          .update({ name: a.name, anchor_order: i })
+          .eq("id", a.id)
+          .eq("user_id", user.id),
+      );
+      const results = await Promise.all(updates);
+      const firstErr = results.find((r) => r.error)?.error;
+      if (firstErr) throw firstErr;
+      toast.success("Palace updated");
+      setEditOpen(false);
+      await refreshAll();
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't update anchors");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   // ---- Render ----
@@ -443,6 +530,10 @@ const MemoryPalace = () => {
                 <Brain className="h-4 w-4" />
                 Start recall
               </Button>
+              <Button variant="outline" onClick={openEditAnchors}>
+                <Settings2 className="h-4 w-4" />
+                Edit palace
+              </Button>
             </div>
 
             <div className="space-y-3">
@@ -533,6 +624,76 @@ const MemoryPalace = () => {
                   <p className="text-xs text-muted-foreground mt-3">
                     Place at least one word to begin recall.
                   </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recall progress</CardTitle>
+                <CardDescription>
+                  Per-word memory strength. {STABILIZE_AT} consecutive correct recalls
+                  promote a word to <span className="font-medium">stable</span> and free
+                  its slot.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {active.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">
+                    No active words yet.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border/60">
+                    {active.map((p) => {
+                      const total = p.recall_correct + p.recall_incorrect;
+                      const accuracy =
+                        total > 0 ? Math.round((p.recall_correct / total) * 100) : 0;
+                      const progress = Math.min(p.recall_correct, STABILIZE_AT);
+                      const willStabilize = progress >= STABILIZE_AT - 1;
+                      const sessionResult = recallResults[p.id];
+                      return (
+                        <li key={p.id} className="py-3 flex items-center gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-display font-medium truncate">
+                                {p.word}
+                              </span>
+                              <Badge
+                                variant={willStabilize ? "default" : "secondary"}
+                                className="font-normal text-[10px] uppercase tracking-wide"
+                              >
+                                Active
+                              </Badge>
+                              {sessionResult === "correct" && (
+                                <Badge className="bg-primary/15 text-primary border-0 font-normal text-[10px]">
+                                  ✓ this session
+                                </Badge>
+                              )}
+                              {sessionResult === "incorrect" && (
+                                <Badge
+                                  variant="destructive"
+                                  className="font-normal text-[10px] opacity-80"
+                                >
+                                  ✕ this session
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              at <span className="italic">{p.anchor_name}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                            <span title="Correct recalls">✓ {p.recall_correct}</span>
+                            <span title="Incorrect recalls">✕ {p.recall_incorrect}</span>
+                            <span className="tabular-nums">{accuracy}%</span>
+                            <span className="font-mono tabular-nums text-[11px]">
+                              {progress}/{STABILIZE_AT}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
               </CardContent>
             </Card>
@@ -758,6 +919,39 @@ const MemoryPalace = () => {
 
           {current && (
             <div className="space-y-4">
+              {/* Live session progress dots */}
+              <div className="flex items-center justify-center gap-1.5">
+                {recallQueue.map((p, i) => {
+                  const r = recallResults[p.id];
+                  const isCurrent = i === recallIndex;
+                  return (
+                    <span
+                      key={p.id}
+                      className={`h-1.5 rounded-full transition-all ${
+                        isCurrent ? "w-5" : "w-1.5"
+                      } ${
+                        r === "correct"
+                          ? "bg-primary"
+                          : r === "incorrect"
+                            ? "bg-destructive/70"
+                            : isCurrent
+                              ? "bg-foreground/60"
+                              : "bg-muted"
+                      }`}
+                      aria-label={
+                        r === "correct"
+                          ? "correct"
+                          : r === "incorrect"
+                            ? "incorrect"
+                            : isCurrent
+                              ? "current"
+                              : "pending"
+                      }
+                    />
+                  );
+                })}
+              </div>
+
               <div className="rounded-md border border-border bg-muted/30 p-4 text-center">
                 <div className="text-xs text-muted-foreground uppercase tracking-wide">
                   Anchor
@@ -822,6 +1016,71 @@ const MemoryPalace = () => {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Edit anchors dialog ===== */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit your palace</DialogTitle>
+            <DialogDescription>
+              Rename anchors or change their order. Capacity rules (max 2 active words
+              per anchor, max 10 total) stay enforced — reordering doesn't change them.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+            {editAnchors.map((a, i) => (
+              <div
+                key={a.id}
+                className="flex items-center gap-2 rounded-md border border-border/60 p-2"
+              >
+                <span className="text-xs text-muted-foreground font-mono w-6 text-center">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <Input
+                  value={a.name}
+                  onChange={(e) => renameEditAnchor(a.id, e.target.value)}
+                  maxLength={60}
+                  className="flex-1"
+                />
+                <Badge variant="secondary" className="font-normal shrink-0">
+                  {a.active_word_count}/2
+                </Badge>
+                <button
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors p-1"
+                  onClick={() => moveEditAnchor(a.id, -1)}
+                  disabled={i === 0}
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors p-1"
+                  onClick={() => moveEditAnchor(a.id, 1)}
+                  disabled={i === editAnchors.length - 1}
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEditAnchors} disabled={savingEdit}>
+              {savingEdit ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              Save changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
