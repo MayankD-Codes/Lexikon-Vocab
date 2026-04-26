@@ -115,6 +115,13 @@ const MemoryPalace = () => {
   const [recallChecked, setRecallChecked] = useState(false);
   const [recallCorrect, setRecallCorrect] = useState(false);
   const [recallQueue, setRecallQueue] = useState<ActivePlacement[]>([]);
+  // Per-session live recall results (placement id -> outcome)
+  const [recallResults, setRecallResults] = useState<Record<string, "correct" | "incorrect">>({});
+
+  // Anchor edit dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editAnchors, setEditAnchors] = useState<AnchorRow[]>([]);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const refreshAll = async () => {
     if (!user) return;
