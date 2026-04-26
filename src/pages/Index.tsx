@@ -71,7 +71,7 @@ const Index = () => {
             </div>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight">
               Your personal
-              <span className="block italic text-primary">English dictionary.</span>
+              <span className="block italic text-primary">English Vocabulary.</span>
             </h1>
             <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Capture every new word you discover — with meaning, pronunciation, examples and personal notes. Build a vocabulary that's truly yours.
