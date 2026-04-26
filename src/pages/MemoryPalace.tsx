@@ -295,6 +295,7 @@ const MemoryPalace = () => {
     // Shuffle a copy
     const shuffled = [...active].sort(() => Math.random() - 0.5);
     setRecallQueue(shuffled);
+    setRecallResults({});
     setRecallIndex(0);
     setRecallGuess("");
     setRecallChecked(false);
@@ -311,6 +312,7 @@ const MemoryPalace = () => {
     const correct = guess.length > 0 && guess === truth;
     setRecallCorrect(correct);
     setRecallChecked(true);
+    setRecallResults((prev) => ({ ...prev, [current.id]: correct ? "correct" : "incorrect" }));
 
     try {
       const newCorrect = current.recall_correct + (correct ? 1 : 0);
@@ -326,6 +328,14 @@ const MemoryPalace = () => {
         })
         .eq("id", current.id);
       if (error) throw error;
+      // Reflect new counts in the in-memory queue so live progress shows updated values.
+      setRecallQueue((q) =>
+        q.map((p) =>
+          p.id === current.id
+            ? { ...p, recall_correct: newCorrect, recall_incorrect: newIncorrect }
+            : p,
+        ),
+      );
       if (shouldStabilize) {
         toast.success(`"${current.word}" is now stable in memory`);
       }
@@ -345,6 +355,63 @@ const MemoryPalace = () => {
     setRecallGuess("");
     setRecallChecked(false);
     setRecallCorrect(false);
+  };
+
+  // ---- Anchor editing & reordering ----
+  const openEditAnchors = () => {
+    setEditAnchors(anchors.map((a) => ({ ...a })));
+    setEditOpen(true);
+  };
+
+  const renameEditAnchor = (id: string, name: string) => {
+    setEditAnchors((arr) =>
+      arr.map((a) => (a.id === id ? { ...a, name: name.slice(0, 60) } : a)),
+    );
+  };
+
+  const moveEditAnchor = (id: string, dir: -1 | 1) => {
+    setEditAnchors((arr) => {
+      const idx = arr.findIndex((a) => a.id === id);
+      if (idx < 0) return arr;
+      const target = idx + dir;
+      if (target < 0 || target >= arr.length) return arr;
+      const copy = [...arr];
+      [copy[idx], copy[target]] = [copy[target], copy[idx]];
+      return copy.map((a, i) => ({ ...a, anchor_order: i }));
+    });
+  };
+
+  const saveEditAnchors = async () => {
+    if (!user) return;
+    const cleaned = editAnchors.map((a) => ({ ...a, name: a.name.trim() }));
+    if (cleaned.some((a) => !a.name)) {
+      toast.error("Anchors can't be empty");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      // Update each anchor's name + order. Capacity rules (max 2 active per anchor,
+      // max 10 active per user) are enforced by the placement validation trigger and
+      // are unaffected by renaming or reordering anchors themselves.
+      const updates = cleaned.map((a, i) =>
+        supabase
+          .from("memory_palace_anchors")
+          .update({ name: a.name, anchor_order: i })
+          .eq("id", a.id)
+          .eq("user_id", user.id),
+      );
+      const results = await Promise.all(updates);
+      const firstErr = results.find((r) => r.error)?.error;
+      if (firstErr) throw firstErr;
+      toast.success("Palace updated");
+      setEditOpen(false);
+      await refreshAll();
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't update anchors");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   // ---- Render ----
