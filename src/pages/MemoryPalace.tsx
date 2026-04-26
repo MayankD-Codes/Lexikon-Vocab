@@ -985,6 +985,71 @@ const MemoryPalace = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* ===== Edit anchors dialog ===== */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit your palace</DialogTitle>
+            <DialogDescription>
+              Rename anchors or change their order. Capacity rules (max 2 active words
+              per anchor, max 10 total) stay enforced — reordering doesn't change them.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+            {editAnchors.map((a, i) => (
+              <div
+                key={a.id}
+                className="flex items-center gap-2 rounded-md border border-border/60 p-2"
+              >
+                <span className="text-xs text-muted-foreground font-mono w-6 text-center">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <Input
+                  value={a.name}
+                  onChange={(e) => renameEditAnchor(a.id, e.target.value)}
+                  maxLength={60}
+                  className="flex-1"
+                />
+                <Badge variant="secondary" className="font-normal shrink-0">
+                  {a.active_word_count}/2
+                </Badge>
+                <button
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors p-1"
+                  onClick={() => moveEditAnchor(a.id, -1)}
+                  disabled={i === 0}
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors p-1"
+                  onClick={() => moveEditAnchor(a.id, 1)}
+                  disabled={i === editAnchors.length - 1}
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEditAnchors} disabled={savingEdit}>
+              {savingEdit ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
