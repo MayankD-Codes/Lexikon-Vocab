@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Sparkles, Trash2, Brain, ArrowRight, Check, X, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Sparkles,
+  Trash2,
+  Brain,
+  ArrowRight,
+  Check,
+  X,
+  Loader2,
+  Pencil,
+  ArrowUp,
+  ArrowDown,
+  Settings2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
