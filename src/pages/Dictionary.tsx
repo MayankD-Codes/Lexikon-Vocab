@@ -206,11 +206,15 @@ const Dictionary = () => {
           });
 
           // Combine per-POS columns into part_of_speech (unless already provided)
+          // Skip empty values and dash placeholders so we don't store junk like "verb: —; adjective: —"
           if (!obj.part_of_speech) {
             const parts: string[] = [];
             POS_PARTS.forEach((label, i) => {
               const v = norm[posKeys[i]];
-              if (v) parts.push(`${label.toLowerCase()}: ${v}`);
+              if (!v) return;
+              const cleaned = v.replace(/^[\s\-—–_]+$/, "").trim();
+              if (!cleaned) return;
+              parts.push(`${label.toLowerCase()}: ${cleaned}`);
             });
             if (parts.length) obj.part_of_speech = parts.join("; ");
           }
