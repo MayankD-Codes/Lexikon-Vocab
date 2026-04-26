@@ -333,10 +333,10 @@ const Dictionary = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((w) => (
               <Link key={w.id} to={`/word/${w.id}`} className="group block rounded-xl bg-card border border-border/60 p-5 shadow-card hover:shadow-elegant hover:border-primary/40 transition-all">
-                <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <h3 className="font-display text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors truncate">{w.word}</h3>
+                <div className="flex items-baseline justify-between gap-2 mb-1 min-w-0">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors truncate shrink-0 max-w-[60%]">{w.word}</h3>
                   {w.part_of_speech && (
-                    <span className="text-xs italic text-muted-foreground shrink-0">{w.part_of_speech}</span>
+                    <span className="text-xs italic text-muted-foreground truncate min-w-0 text-right">{w.part_of_speech}</span>
                   )}
                 </div>
                 {w.pronunciation && (
