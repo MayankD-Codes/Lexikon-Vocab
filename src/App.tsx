@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AddWord from "./pages/AddWord.tsx";
 import Dictionary from "./pages/Dictionary.tsx";
 import WordDetail from "./pages/WordDetail.tsx";
+import EditWord from "./pages/EditWord.tsx";
 import Quiz from "./pages/Quiz.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Auth from "./pages/Auth.tsx";
