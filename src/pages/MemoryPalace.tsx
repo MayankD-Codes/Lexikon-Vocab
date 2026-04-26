@@ -530,6 +530,10 @@ const MemoryPalace = () => {
                 <Brain className="h-4 w-4" />
                 Start recall
               </Button>
+              <Button variant="outline" onClick={openEditAnchors}>
+                <Settings2 className="h-4 w-4" />
+                Edit palace
+              </Button>
             </div>
 
             <div className="space-y-3">
