@@ -93,17 +93,33 @@ const Dictionary = () => {
     loadWords();
   }, []);
 
+  const buildExportRow = (w: Word): Record<string, string> => {
+    const posCols = splitPartOfSpeech(w.part_of_speech);
+    const row: Record<string, string> = {
+      "Word *": w.word ?? "",
+      "Pronunciation": w.pronunciation ?? "",
+      "Spelling": w.spelling ?? "",
+      "Word forms": w.word_forms ?? "",
+      "Meaning (English)": w.meaning_english ?? "",
+      "Meaning (Hindi)": w.meaning_hindi ?? "",
+      "Example sentence": w.example_sentence ?? "",
+      "Synonyms": w.synonyms ?? "",
+      "Antonyms": w.antonyms ?? "",
+      "Notes": w.notes ?? "",
+    };
+    POS_PARTS.forEach((p) => { row[p] = posCols[p] ?? ""; });
+    return row;
+  };
+
   const handleExport = () => {
     if (words.length === 0) {
       toast({ title: "Nothing to export", description: "Add some words first." });
       return;
     }
-    const rows = words.map((w) => {
-      const r: Record<string, string> = {};
-      EXPORT_FIELDS.forEach((f) => { r[f] = (w[f] as string) ?? ""; });
-      return r;
-    });
-    const ws = XLSX.utils.json_to_sheet(rows, { header: EXPORT_FIELDS as string[] });
+    const headers = [...TEMPLATE_HEADERS] as string[];
+    const rows = words.map(buildExportRow);
+    const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.max(14, h.length + 2) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Words");
     XLSX.writeFile(wb, `lexikon-words-${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -111,11 +127,11 @@ const Dictionary = () => {
   };
 
   const handleDownloadTemplate = () => {
+    const headers = [...TEMPLATE_HEADERS] as string[];
     const sample: Record<string, string> = {};
-    TEMPLATE_HEADERS.forEach((h) => (sample[h] = ""));
-    const ws = XLSX.utils.json_to_sheet([sample], { header: TEMPLATE_HEADERS });
-    // Set reasonable column widths
-    ws["!cols"] = TEMPLATE_HEADERS.map((h) => ({ wch: Math.max(14, h.length + 2) }));
+    headers.forEach((h) => (sample[h] = ""));
+    const ws = XLSX.utils.json_to_sheet([sample], { header: headers });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.max(14, h.length + 2) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
     XLSX.writeFile(wb, "lexikon-import-template.xlsx");
