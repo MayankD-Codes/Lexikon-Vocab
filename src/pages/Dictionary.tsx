@@ -182,8 +182,8 @@ const Dictionary = () => {
             if (parts.length) obj.part_of_speech = parts.join("; ");
           }
 
-          // Ensure all export fields exist (null if missing)
-          EXPORT_FIELDS.filter((f) => f !== "word").forEach((f) => {
+          // Ensure all storage fields exist (null if missing) so insert is consistent
+          (["pronunciation","spelling","meaning_english","meaning_hindi","part_of_speech","word_forms","example_sentence","synonyms","antonyms","notes"] as (keyof Word)[]).forEach((f) => {
             if (!(f in obj)) obj[f] = null;
           });
           return obj;
