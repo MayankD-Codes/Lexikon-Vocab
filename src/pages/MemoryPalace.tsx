@@ -919,6 +919,39 @@ const MemoryPalace = () => {
 
           {current && (
             <div className="space-y-4">
+              {/* Live session progress dots */}
+              <div className="flex items-center justify-center gap-1.5">
+                {recallQueue.map((p, i) => {
+                  const r = recallResults[p.id];
+                  const isCurrent = i === recallIndex;
+                  return (
+                    <span
+                      key={p.id}
+                      className={`h-1.5 rounded-full transition-all ${
+                        isCurrent ? "w-5" : "w-1.5"
+                      } ${
+                        r === "correct"
+                          ? "bg-primary"
+                          : r === "incorrect"
+                            ? "bg-destructive/70"
+                            : isCurrent
+                              ? "bg-foreground/60"
+                              : "bg-muted"
+                      }`}
+                      aria-label={
+                        r === "correct"
+                          ? "correct"
+                          : r === "incorrect"
+                            ? "incorrect"
+                            : isCurrent
+                              ? "current"
+                              : "pending"
+                      }
+                    />
+                  );
+                })}
+              </div>
+
               <div className="rounded-md border border-border bg-muted/30 p-4 text-center">
                 <div className="text-xs text-muted-foreground uppercase tracking-wide">
                   Anchor
