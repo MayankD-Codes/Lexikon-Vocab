@@ -47,6 +47,7 @@ const App = () => (
                 <Route path="/add" element={<AddWord />} />
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/word/:id" element={<WordDetail />} />
+                <Route path="/word/:id/edit" element={<EditWord />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/community" element={<Community />} />
