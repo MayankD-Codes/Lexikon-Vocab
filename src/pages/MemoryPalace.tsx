@@ -627,6 +627,76 @@ const MemoryPalace = () => {
                 )}
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recall progress</CardTitle>
+                <CardDescription>
+                  Per-word memory strength. {STABILIZE_AT} consecutive correct recalls
+                  promote a word to <span className="font-medium">stable</span> and free
+                  its slot.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {active.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">
+                    No active words yet.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border/60">
+                    {active.map((p) => {
+                      const total = p.recall_correct + p.recall_incorrect;
+                      const accuracy =
+                        total > 0 ? Math.round((p.recall_correct / total) * 100) : 0;
+                      const progress = Math.min(p.recall_correct, STABILIZE_AT);
+                      const willStabilize = progress >= STABILIZE_AT - 1;
+                      const sessionResult = recallResults[p.id];
+                      return (
+                        <li key={p.id} className="py-3 flex items-center gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-display font-medium truncate">
+                                {p.word}
+                              </span>
+                              <Badge
+                                variant={willStabilize ? "default" : "secondary"}
+                                className="font-normal text-[10px] uppercase tracking-wide"
+                              >
+                                Active
+                              </Badge>
+                              {sessionResult === "correct" && (
+                                <Badge className="bg-primary/15 text-primary border-0 font-normal text-[10px]">
+                                  ✓ this session
+                                </Badge>
+                              )}
+                              {sessionResult === "incorrect" && (
+                                <Badge
+                                  variant="destructive"
+                                  className="font-normal text-[10px] opacity-80"
+                                >
+                                  ✕ this session
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              at <span className="italic">{p.anchor_name}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                            <span title="Correct recalls">✓ {p.recall_correct}</span>
+                            <span title="Incorrect recalls">✕ {p.recall_incorrect}</span>
+                            <span className="tabular-nums">{accuracy}%</span>
+                            <span className="font-mono tabular-nums text-[11px]">
+                              {progress}/{STABILIZE_AT}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       )}
