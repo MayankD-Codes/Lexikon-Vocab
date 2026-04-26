@@ -206,11 +206,15 @@ const Dictionary = () => {
           });
 
           // Combine per-POS columns into part_of_speech (unless already provided)
+          // Skip empty values and dash placeholders so we don't store junk like "verb: —; adjective: —"
           if (!obj.part_of_speech) {
             const parts: string[] = [];
             POS_PARTS.forEach((label, i) => {
               const v = norm[posKeys[i]];
-              if (v) parts.push(`${label.toLowerCase()}: ${v}`);
+              if (!v) return;
+              const cleaned = v.replace(/^[\s\-—–_]+$/, "").trim();
+              if (!cleaned) return;
+              parts.push(`${label.toLowerCase()}: ${cleaned}`);
             });
             if (parts.length) obj.part_of_speech = parts.join("; ");
           }
@@ -329,10 +333,10 @@ const Dictionary = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((w) => (
               <Link key={w.id} to={`/word/${w.id}`} className="group block rounded-xl bg-card border border-border/60 p-5 shadow-card hover:shadow-elegant hover:border-primary/40 transition-all">
-                <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <h3 className="font-display text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors truncate">{w.word}</h3>
+                <div className="flex items-baseline justify-between gap-2 mb-1 min-w-0">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors truncate shrink-0 max-w-[60%]">{w.word}</h3>
                   {w.part_of_speech && (
-                    <span className="text-xs italic text-muted-foreground shrink-0">{w.part_of_speech}</span>
+                    <span className="text-xs italic text-muted-foreground truncate min-w-0 text-right">{w.part_of_speech}</span>
                   )}
                 </div>
                 {w.pronunciation && (
