@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AddWord from "./pages/AddWord.tsx";
 import Dictionary from "./pages/Dictionary.tsx";
 import WordDetail from "./pages/WordDetail.tsx";
+import EditWord from "./pages/EditWord.tsx";
 import Quiz from "./pages/Quiz.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Auth from "./pages/Auth.tsx";
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/add" element={<AddWord />} />
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/word/:id" element={<WordDetail />} />
+                <Route path="/word/:id/edit" element={<EditWord />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/community" element={<Community />} />
