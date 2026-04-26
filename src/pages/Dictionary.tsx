@@ -11,13 +11,9 @@ import { Search, Plus, BookOpen, Download, Upload, FileDown } from "lucide-react
 import { toast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 
-const EXPORT_FIELDS: (keyof Word)[] = [
-  "word", "pronunciation", "spelling", "meaning_english", "meaning_hindi",
-  "part_of_speech", "word_forms", "example_sentence", "synonyms", "antonyms", "notes",
-];
-
 const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
 
+// Canonical 18-column template header order. Used for Template, Export, and Import.
 const TEMPLATE_HEADERS = [
   "Word *",
   "Pronunciation",
@@ -30,7 +26,29 @@ const TEMPLATE_HEADERS = [
   "Synonyms",
   "Antonyms",
   "Notes",
-];
+] as const;
+
+// Parse a stored part_of_speech string like "noun: foo; verb: bar" back into per-POS columns
+const splitPartOfSpeech = (raw: string | null): Record<string, string> => {
+  const out: Record<string, string> = {};
+  if (!raw) return out;
+  const lowerToLabel: Record<string, string> = {};
+  POS_PARTS.forEach((p) => { lowerToLabel[p.toLowerCase()] = p; });
+  // Split on ; or newline
+  raw.split(/[;\n]+/).forEach((seg) => {
+    const m = seg.match(/^\s*([A-Za-z]+)\s*:\s*(.+?)\s*$/);
+    if (!m) return;
+    const label = lowerToLabel[m[1].toLowerCase()];
+    if (label) out[label] = (out[label] ? out[label] + "; " : "") + m[2];
+  });
+  // If no label-prefixed segments matched, drop entire raw value into "Noun" as a sensible fallback only if it looks like just a single POS word
+  if (Object.keys(out).length === 0) {
+    const trimmed = raw.trim();
+    const single = lowerToLabel[trimmed.toLowerCase()];
+    if (single) out[single] = trimmed;
+  }
+  return out;
+};
 
 // Map normalized header (lowercase, trimmed) -> Word field key
 const HEADER_TO_FIELD: Record<string, keyof Word> = {
@@ -75,17 +93,33 @@ const Dictionary = () => {
     loadWords();
   }, []);
 
+  const buildExportRow = (w: Word): Record<string, string> => {
+    const posCols = splitPartOfSpeech(w.part_of_speech);
+    const row: Record<string, string> = {
+      "Word *": w.word ?? "",
+      "Pronunciation": w.pronunciation ?? "",
+      "Spelling": w.spelling ?? "",
+      "Word forms": w.word_forms ?? "",
+      "Meaning (English)": w.meaning_english ?? "",
+      "Meaning (Hindi)": w.meaning_hindi ?? "",
+      "Example sentence": w.example_sentence ?? "",
+      "Synonyms": w.synonyms ?? "",
+      "Antonyms": w.antonyms ?? "",
+      "Notes": w.notes ?? "",
+    };
+    POS_PARTS.forEach((p) => { row[p] = posCols[p] ?? ""; });
+    return row;
+  };
+
   const handleExport = () => {
     if (words.length === 0) {
       toast({ title: "Nothing to export", description: "Add some words first." });
       return;
     }
-    const rows = words.map((w) => {
-      const r: Record<string, string> = {};
-      EXPORT_FIELDS.forEach((f) => { r[f] = (w[f] as string) ?? ""; });
-      return r;
-    });
-    const ws = XLSX.utils.json_to_sheet(rows, { header: EXPORT_FIELDS as string[] });
+    const headers = [...TEMPLATE_HEADERS] as string[];
+    const rows = words.map(buildExportRow);
+    const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.max(14, h.length + 2) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Words");
     XLSX.writeFile(wb, `lexikon-words-${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -93,11 +127,11 @@ const Dictionary = () => {
   };
 
   const handleDownloadTemplate = () => {
+    const headers = [...TEMPLATE_HEADERS] as string[];
     const sample: Record<string, string> = {};
-    TEMPLATE_HEADERS.forEach((h) => (sample[h] = ""));
-    const ws = XLSX.utils.json_to_sheet([sample], { header: TEMPLATE_HEADERS });
-    // Set reasonable column widths
-    ws["!cols"] = TEMPLATE_HEADERS.map((h) => ({ wch: Math.max(14, h.length + 2) }));
+    headers.forEach((h) => (sample[h] = ""));
+    const ws = XLSX.utils.json_to_sheet([sample], { header: headers });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.max(14, h.length + 2) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
     XLSX.writeFile(wb, "lexikon-import-template.xlsx");
@@ -148,8 +182,8 @@ const Dictionary = () => {
             if (parts.length) obj.part_of_speech = parts.join("; ");
           }
 
-          // Ensure all export fields exist (null if missing)
-          EXPORT_FIELDS.filter((f) => f !== "word").forEach((f) => {
+          // Ensure all storage fields exist (null if missing) so insert is consistent
+          (["pronunciation","spelling","meaning_english","meaning_hindi","part_of_speech","word_forms","example_sentence","synonyms","antonyms","notes"] as (keyof Word)[]).forEach((f) => {
             if (!(f in obj)) obj[f] = null;
           });
           return obj;
