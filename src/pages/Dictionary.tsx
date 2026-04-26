@@ -154,6 +154,39 @@ const Dictionary = () => {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
+
+      // Strict header validation: must match TEMPLATE_HEADERS exactly (same names, same order, no extras)
+      const headerMatrix = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, blankrows: false }) as unknown[][];
+      const actualHeaders = (headerMatrix[0] ?? []).map((h) => String(h ?? "").trim());
+      const expected = [...TEMPLATE_HEADERS] as string[];
+
+      const mismatches: string[] = [];
+      const maxLen = Math.max(expected.length, actualHeaders.length);
+      for (let i = 0; i < maxLen; i++) {
+        const exp = expected[i];
+        const got = actualHeaders[i];
+        if (exp === undefined) {
+          mismatches.push(`Column ${i + 1}: unexpected extra header "${got}"`);
+        } else if (got === undefined) {
+          mismatches.push(`Column ${i + 1}: missing "${exp}"`);
+        } else if (exp !== got) {
+          mismatches.push(`Column ${i + 1}: expected "${exp}", got "${got}"`);
+        }
+      }
+
+      if (mismatches.length > 0) {
+        toast({
+          title: "Invalid template",
+          description:
+            `Your file's headers don't match the Lexikon import template (18 columns, exact order). Issues:\n• ` +
+            mismatches.slice(0, 6).join("\n• ") +
+            (mismatches.length > 6 ? `\n…and ${mismatches.length - 6} more` : "") +
+            `\n\nDownload the latest Template and try again.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
       const posKeys = POS_PARTS.map((p) => p.toLowerCase());
 
