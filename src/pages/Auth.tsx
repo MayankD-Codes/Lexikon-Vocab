@@ -49,13 +49,13 @@ const Auth = () => {
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) {
-        toast.error(error.message);
+        toast.error(friendlyAuthError(error));
       } else {
         toast.success("Welcome to Lexikon!");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
+      if (error) toast.error(friendlyAuthError(error));
       else toast.success("Signed in");
     }
     setBusy(false);
