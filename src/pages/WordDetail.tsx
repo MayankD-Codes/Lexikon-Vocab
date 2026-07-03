@@ -68,7 +68,7 @@ const WordDetail = () => {
   const onDelete = async () => {
     if (!word) return;
     const { error } = await supabase.from("words").delete().eq("id", word.id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error, "Couldn't delete this word."));
     toast.success("Word deleted");
     navigate("/dictionary");
   };
