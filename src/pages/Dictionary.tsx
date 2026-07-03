@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Plus, BookOpen, Download, Upload, FileDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
+import { friendlyError } from "@/lib/friendlyError";
 
 const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
 
@@ -234,13 +235,14 @@ const Dictionary = () => {
 
       const { error } = await supabase.from("words").insert(payload as never);
       if (error) {
-        toast({ title: "Import failed", description: error.message, variant: "destructive" });
+        toast({ title: "Import failed", description: friendlyError(error, "Couldn't import your words."), variant: "destructive" });
         return;
       }
       toast({ title: "Imported", description: `${payload.length} word${payload.length === 1 ? "" : "s"} added.` });
       await loadWords();
     } catch (err) {
-      toast({ title: "Import failed", description: (err as Error).message, variant: "destructive" });
+      if (import.meta.env.DEV) console.error("[Dictionary import]", err);
+      toast({ title: "Import failed", description: "We couldn't read that file. Please use the latest Lexikon template.", variant: "destructive" });
     } finally {
       setImporting(false);
     }

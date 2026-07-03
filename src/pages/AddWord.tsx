@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
+import { friendlyError } from "@/lib/friendlyError";
 
 const schema = z.object({
   word: z.string().trim().min(1, "Word is required").max(100),
@@ -145,7 +146,7 @@ const AddWord = () => {
     const { error } = await supabase.from("words").insert(payload as never);
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error, "Couldn't save this word."));
       return;
     }
     toast.success(`"${form.word}" added to your dictionary`);

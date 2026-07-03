@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
+import { friendlyError, friendlyStorageError } from "@/lib/friendlyError";
 
 const nameSchema = z
   .string()
@@ -68,7 +69,7 @@ const Profile = () => {
       .update({ display_name: parsed.data })
       .eq("user_id", user.id);
     setSaving(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(friendlyError(error, "Couldn't update your profile."));
     else toast.success("Profile updated");
   };
 
@@ -96,7 +97,7 @@ const Profile = () => {
 
     if (uploadError) {
       setUploading(false);
-      toast.error(uploadError.message);
+      toast.error(friendlyStorageError(uploadError));
       return;
     }
 
@@ -110,7 +111,7 @@ const Profile = () => {
 
     setUploading(false);
     if (updateError) {
-      toast.error(updateError.message);
+      toast.error(friendlyError(updateError, "Couldn't update your avatar."));
       return;
     }
     setAvatarUrl(publicUrl);

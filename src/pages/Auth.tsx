@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { friendlyAuthError } from "@/lib/friendlyError";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,13 +50,13 @@ const Auth = () => {
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) {
-        toast.error(error.message);
+        toast.error(friendlyAuthError(error));
       } else {
         toast.success("Welcome to Lexikon!");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
+      if (error) toast.error(friendlyAuthError(error));
       else toast.success("Signed in");
     }
     setBusy(false);
