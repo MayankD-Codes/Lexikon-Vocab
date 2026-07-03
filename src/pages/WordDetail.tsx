@@ -9,6 +9,7 @@ import { ArrowLeft, Trash2, Volume2, Sparkles, Loader2, Pencil } from "lucide-re
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
 import { lexiExplainStream } from "@/lib/lexi";
+import { friendlyError } from "@/lib/friendlyError";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
