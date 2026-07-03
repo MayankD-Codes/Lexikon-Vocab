@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { friendlyAuthError } from "@/lib/friendlyError";
 
 import { supabase } from "@/integrations/supabase/client";
 
@@ -58,7 +59,7 @@ const ResetPassword = () => {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyAuthError(error));
       return;
     }
     toast.success("Password updated");

@@ -51,7 +51,7 @@ const WordDetail = () => {
     if (!id) return;
     (async () => {
       const { data, error } = await supabase.from("words").select("*").eq("id", id).maybeSingle();
-      if (error) toast.error(error.message);
+      if (error) toast.error(friendlyError(error, "Couldn't load this word."));
       setWord((data as Word) ?? null);
       setLoading(false);
     })();
