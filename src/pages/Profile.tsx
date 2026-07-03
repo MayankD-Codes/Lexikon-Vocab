@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
+import { friendlyError, friendlyStorageError } from "@/lib/friendlyError";
 
 const nameSchema = z
   .string()
