@@ -179,7 +179,7 @@ const AddWord = () => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={askLexi}
+                  onClick={() => askLexi()}
                   disabled={askingLexi || !form.word.trim()}
                   className="h-8 text-xs gap-1.5"
                 >
