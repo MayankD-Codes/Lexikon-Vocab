@@ -117,6 +117,20 @@ const AddWord = () => {
     }
   };
 
+  // Prefill from ?word= (e.g. from the Capture Word page), and auto-ask Lexi when ?ask=1.
+  useEffect(() => {
+    const w = (searchParams.get("word") ?? "").trim();
+    if (!w || autoAskedRef.current) return;
+    autoAskedRef.current = true;
+    setForm((f) => ({ ...f, word: w }));
+    if (searchParams.get("ask") === "1") {
+      askLexi(w);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
