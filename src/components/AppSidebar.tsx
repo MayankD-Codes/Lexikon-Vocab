@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy, MessagesSquare, Castle } from "lucide-react";
+import { LayoutDashboard, Home, Library, Plus, Brain, BookOpen, LogOut, Trophy, MessagesSquare, Castle, Camera } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +31,7 @@ const primaryItems = [
 const libraryItems = [
   { title: "Dictionary", url: "/dictionary", icon: Library },
   { title: "Add Word", url: "/add", icon: Plus },
+  { title: "Capture Word", url: "/capture", icon: Camera },
 ];
 
 export const AppSidebar = () => {

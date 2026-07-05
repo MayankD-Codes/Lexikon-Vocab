@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -77,14 +77,16 @@ const mapPosString = (pos: string | undefined, word: string): Partial<FormState>
 
 const AddWord = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState<FormState>(initial);
   const [saving, setSaving] = useState(false);
   const [askingLexi, setAskingLexi] = useState(false);
+  const autoAskedRef = useRef(false);
 
   const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const askLexi = async () => {
-    const w = form.word.trim();
+  const askLexi = async (override?: string) => {
+    const w = (override ?? form.word).trim();
     if (!w) {
       toast.error("Type a word first, then ask Lexi.");
       return;
@@ -114,6 +116,20 @@ const AddWord = () => {
       setAskingLexi(false);
     }
   };
+
+  // Prefill from ?word= (e.g. from the Capture Word page), and auto-ask Lexi when ?ask=1.
+  useEffect(() => {
+    const w = (searchParams.get("word") ?? "").trim();
+    if (!w || autoAskedRef.current) return;
+    autoAskedRef.current = true;
+    setForm((f) => ({ ...f, word: w }));
+    if (searchParams.get("ask") === "1") {
+      askLexi(w);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,7 +193,7 @@ const AddWord = () => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={askLexi}
+                  onClick={() => askLexi()}
                   disabled={askingLexi || !form.word.trim()}
                   className="h-8 text-xs gap-1.5"
                 >

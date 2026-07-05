@@ -21,6 +21,7 @@ import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
 import Community from "./pages/Community.tsx";
 import MemoryPalace from "./pages/MemoryPalace.tsx";
+import CaptureWord from "./pages/CaptureWord.tsx";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/add" element={<AddWord />} />
+                <Route path="/capture" element={<CaptureWord />} />
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/word/:id" element={<WordDetail />} />
                 <Route path="/word/:id/edit" element={<EditWord />} />

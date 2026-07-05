@@ -13,6 +13,7 @@ const titles: Record<string, string> = {
   "/community": "Community",
   "/dictionary": "Dictionary",
   "/add": "Add Word",
+  "/capture": "Capture Word",
   "/profile": "Profile",
 };
 
