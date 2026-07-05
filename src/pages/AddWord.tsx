@@ -77,14 +77,16 @@ const mapPosString = (pos: string | undefined, word: string): Partial<FormState>
 
 const AddWord = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState<FormState>(initial);
   const [saving, setSaving] = useState(false);
   const [askingLexi, setAskingLexi] = useState(false);
+  const autoAskedRef = useRef(false);
 
   const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const askLexi = async () => {
-    const w = form.word.trim();
+  const askLexi = async (override?: string) => {
+    const w = (override ?? form.word).trim();
     if (!w) {
       toast.error("Type a word first, then ask Lexi.");
       return;
