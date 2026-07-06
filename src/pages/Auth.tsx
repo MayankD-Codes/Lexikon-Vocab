@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import PasswordStrength from "@/components/PasswordStrength";
+import { authCallbackUrl } from "@/lib/siteUrl";
 
 const credSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -47,7 +48,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { emailRedirectTo: authCallbackUrl("/dashboard") },
       });
       if (error) {
         toast.error(friendlyAuthError(error));

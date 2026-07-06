@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/</loc>
+    <loc>https://lexikon-vocab.vercel.app/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/auth</loc>
+    <loc>https://lexikon-vocab.vercel.app/auth</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/dashboard</loc>
+    <loc>https://lexikon-vocab.vercel.app/dashboard</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/dictionary</loc>
+    <loc>https://lexikon-vocab.vercel.app/dictionary</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/quiz</loc>
+    <loc>https://lexikon-vocab.vercel.app/quiz</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lexikon-wordvault.lovable.app/add</loc>
+    <loc>https://lexikon-vocab.vercel.app/add</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
