@@ -5,4 +5,4 @@ Disallow: /reset-password
 Disallow: /profile
 Disallow: /word/
 
-Sitemap: https://lexikon-wordvault.lovable.app/sitemap.xml
+Sitemap: https://lexikon-vocab.vercel.app/sitemap.xml
