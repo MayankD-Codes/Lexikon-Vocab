@@ -39,7 +39,7 @@ const Profile = () => {
     (async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, avatar_url")
+        .select("display_name, avatar_url, username")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -47,6 +47,7 @@ const Profile = () => {
         toast.error("Couldn't load your profile");
       } else if (data) {
         setDisplayName(data.display_name ?? "");
+        setUsername(data.username ?? "");
         setAvatarUrl(data.avatar_url ?? null);
       }
       setLoading(false);
