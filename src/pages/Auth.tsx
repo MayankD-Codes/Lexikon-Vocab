@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { z } from "zod";
-import { BookOpen, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { BookOpen, User as UserIcon, Lock, ArrowRight, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +13,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import PasswordStrength from "@/components/PasswordStrength";
-import { authCallbackUrl } from "@/lib/siteUrl";
+import { normalizeUsername, validateUsername, usernameToEmail, USERNAME_MAX } from "@/lib/username";
 
-const credSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100),
-});
+type Availability =
+  | { state: "idle" }
+  | { state: "checking" }
+  | { state: "invalid"; message: string }
+  | { state: "available" }
+  | { state: "taken" };
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -27,47 +28,134 @@ const Auth = () => {
   const from = (location.state as { from?: string })?.from ?? "/dashboard";
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [availability, setAvailability] = useState<Availability>({ state: "idle" });
+  const checkSeq = useRef(0);
 
-  // SEO handled via <SEO /> below
+  // Real-time username availability (signup only)
+  useEffect(() => {
+    if (mode !== "signup") {
+      setAvailability({ state: "idle" });
+      return;
+    }
+    const raw = username;
+    if (raw.trim().length === 0) {
+      setAvailability({ state: "idle" });
+      return;
+    }
+    const v = validateUsername(raw);
+    if (!v.ok) {
+      setAvailability({ state: "invalid", message: v.reason });
+      return;
+    }
+    setAvailability({ state: "checking" });
+    const seq = ++checkSeq.current;
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase.rpc("is_username_available", {
+        _username: v.normalized,
+      });
+      if (seq !== checkSeq.current) return;
+      if (error) {
+        setAvailability({ state: "invalid", message: "Couldn't check availability." });
+        return;
+      }
+      setAvailability({ state: data ? "available" : "taken" });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [username, mode]);
 
   if (!loading && user) return <Navigate to={from} replace />;
 
-  const handleEmail = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = credSchema.safeParse({ email, password });
-    if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+    const v = validateUsername(username);
+    if (!v.ok) {
+      toast.error(v.reason);
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
     setBusy(true);
+    const email = usernameToEmail(v.normalized);
+
     if (mode === "signup") {
+      if (availability.state === "taken") {
+        setBusy(false);
+        toast.error("Username already taken.");
+        return;
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: authCallbackUrl("/dashboard") },
+        options: { data: { username: v.normalized } },
       });
       if (error) {
-        toast.error(friendlyAuthError(error));
+        // Race on unique constraint → friendlier message
+        if (/duplicate|already/i.test(error.message)) {
+          toast.error("Username already taken.");
+        } else {
+          toast.error(friendlyAuthError(error));
+        }
       } else {
         toast.success("Welcome to Lexikon!");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(friendlyAuthError(error));
+      if (error) toast.error("Incorrect username or password.");
       else toast.success("Signed in");
     }
     setBusy(false);
   };
 
+  const renderAvailability = () => {
+    if (mode !== "signup" || username.trim().length === 0) return null;
+    switch (availability.state) {
+      case "checking":
+        return (
+          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" /> Checking availability…
+          </p>
+        );
+      case "invalid":
+        return (
+          <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+            <X className="h-3 w-3" /> {availability.message}
+          </p>
+        );
+      case "taken":
+        return (
+          <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+            <X className="h-3 w-3" /> Username already taken.
+          </p>
+        );
+      case "available":
+        return (
+          <p className="text-xs text-green-600 dark:text-green-500 mt-1 flex items-center gap-1">
+            <Check className="h-3 w-3" /> Username available.
+          </p>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const canSubmit =
+    !busy &&
+    username.trim().length > 0 &&
+    password.length >= 6 &&
+    (mode === "signin" || availability.state === "available");
+
   return (
     <div className="min-h-screen bg-gradient-paper flex flex-col">
       <SEO
         title={mode === "signin" ? "Sign in — Lexikon" : "Create your account — Lexikon"}
-        description="Sign in or create a free Lexikon account to start building your personal English vocabulary dictionary."
+        description="Sign in or create a free Lexikon account with a username to build your personal English vocabulary dictionary."
       />
       <header className="container py-6">
         <Link to="/" className="inline-flex items-center gap-2">
@@ -84,7 +172,7 @@ const Auth = () => {
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            {mode === "signin" ? "Sign in to your vocabulary" : "Start building your personal dictionary"}
+            {mode === "signin" ? "Sign in with your username" : "Pick a username to get started"}
           </p>
 
           <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
@@ -94,22 +182,28 @@ const Auth = () => {
             </TabsList>
 
             <TabsContent value={mode} className="mt-0 space-y-4">
-              <form onSubmit={handleEmail} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="username">Username</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="you@example.com"
-                      className="pl-9"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="username"
+                      type="text"
+                      inputMode="text"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      autoComplete="username"
+                      placeholder="your.username"
+                      className="pl-9 lowercase"
+                      value={username}
+                      onChange={(e) => setUsername(normalizeUsername(e.target.value).slice(0, USERNAME_MAX))}
+                      maxLength={USERNAME_MAX}
                       required
                     />
                   </div>
+                  {renderAvailability()}
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
@@ -137,7 +231,7 @@ const Auth = () => {
                   </div>
                   {mode === "signup" && <PasswordStrength password={password} />}
                 </div>
-                <Button type="submit" className="w-full h-11" disabled={busy}>
+                <Button type="submit" className="w-full h-11" disabled={!canSubmit}>
                   {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
