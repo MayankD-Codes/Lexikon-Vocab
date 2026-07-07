@@ -40,23 +40,26 @@ export const AppSidebar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       setDisplayName(null);
+      setUsername(null);
       setAvatarUrl(null);
       return;
     }
     let cancelled = false;
     supabase
       .from("profiles")
-      .select("display_name, avatar_url")
+      .select("display_name, avatar_url, username")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled || !data) return;
         setDisplayName(data.display_name ?? null);
+        setUsername(data.username ?? null);
         setAvatarUrl(data.avatar_url ?? null);
       });
     return () => {
@@ -75,8 +78,8 @@ export const AppSidebar = () => {
     toast.success("Signed out");
   };
 
-  const label = displayName || user?.email || "Account";
-  const initials = (displayName || user?.email || "?").trim().slice(0, 2).toUpperCase();
+  const label = displayName || (username ? `@${username}` : "Account");
+  const initials = (displayName || username || "?").trim().slice(0, 2).toUpperCase();
 
   const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
     <SidebarMenuItem key={item.title}>
