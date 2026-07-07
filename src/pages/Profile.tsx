@@ -186,8 +186,11 @@ const Profile = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" value={user?.email ?? ""} disabled />
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" value={username ? `@${username}` : ""} disabled />
+                <p className="text-xs text-muted-foreground">
+                  Your public profile: <span className="font-mono">/{username}</span>
+                </p>
               </div>
 
               <div className="space-y-2">
