@@ -16,13 +16,13 @@ import EditWord from "./pages/EditWord.tsx";
 import Quiz from "./pages/Quiz.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Auth from "./pages/Auth.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";
 import AuthCallback from "./pages/AuthCallback.tsx";
 import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
 import Community from "./pages/Community.tsx";
 import MemoryPalace from "./pages/MemoryPalace.tsx";
 import CaptureWord from "./pages/CaptureWord.tsx";
+import UserProfile from "./pages/UserProfile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +37,6 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 element={
                   <ProtectedRoute>
@@ -58,6 +57,8 @@ const App = () => (
                 <Route path="/memory-palace" element={<MemoryPalace />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
+              {/* Public Instagram-style profile route */}
+              <Route path="/:username" element={<UserProfile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

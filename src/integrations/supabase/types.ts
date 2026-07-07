@@ -134,6 +134,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          username: string
         }
         Insert: {
           avatar_url?: string | null
@@ -143,6 +144,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          username: string
         }
         Update: {
           avatar_url?: string | null
@@ -152,6 +154,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -356,6 +359,15 @@ export type Database = {
           style: string
         }[]
       }
+      get_profile_by_username: {
+        Args: { _username: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          user_id: string
+          username: string
+        }[]
+      }
       get_unplaced_words: {
         Args: { _user_id: string }
         Returns: {
@@ -364,6 +376,7 @@ export type Database = {
           word: string
         }[]
       }
+      is_username_available: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

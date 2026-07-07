@@ -25,6 +25,7 @@ const Profile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,7 +39,7 @@ const Profile = () => {
     (async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, avatar_url")
+        .select("display_name, avatar_url, username")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -46,6 +47,7 @@ const Profile = () => {
         toast.error("Couldn't load your profile");
       } else if (data) {
         setDisplayName(data.display_name ?? "");
+        setUsername(data.username ?? "");
         setAvatarUrl(data.avatar_url ?? null);
       }
       setLoading(false);
@@ -184,8 +186,11 @@ const Profile = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" value={user?.email ?? ""} disabled />
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" value={username ? `@${username}` : ""} disabled />
+                <p className="text-xs text-muted-foreground">
+                  Your public profile: <span className="font-mono">/{username}</span>
+                </p>
               </div>
 
               <div className="space-y-2">
