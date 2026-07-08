@@ -1,4 +1,5 @@
 // Lexi — deep explanation for a saved word using Google Gemini 2.5 Flash directly
+import { requireUser } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -12,6 +13,9 @@ const SYSTEM_PROMPT =
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const _auth = await requireUser(req, corsHeaders);
+  if (_auth instanceof Response) return _auth;
 
   try {
     const { word, context } = await req.json();

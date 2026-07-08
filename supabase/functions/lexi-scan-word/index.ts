@@ -1,4 +1,5 @@
 // Lexi — extract English words from a photo using Gemini 2.5 Flash vision
+import { requireUser } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -12,6 +13,9 @@ const SYSTEM_PROMPT =
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const _auth = await requireUser(req, corsHeaders);
+  if (_auth instanceof Response) return _auth;
 
   try {
     const { image, mimeType } = await req.json();

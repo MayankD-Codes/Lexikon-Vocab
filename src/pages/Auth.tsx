@@ -76,8 +76,8 @@ const Auth = () => {
       toast.error(v.reason);
       return;
     }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
       return;
     }
 
@@ -96,7 +96,6 @@ const Auth = () => {
         options: { data: { username: v.normalized } },
       });
       if (error) {
-        // Race on unique constraint → friendlier message
         if (/duplicate|already/i.test(error.message)) {
           toast.error("Username already taken.");
         } else {
@@ -107,7 +106,7 @@ const Auth = () => {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error("Incorrect username or password.");
+      if (error) toast.error(friendlyAuthError(error));
       else toast.success("Signed in");
     }
     setBusy(false);
@@ -148,7 +147,7 @@ const Auth = () => {
   const canSubmit =
     !busy &&
     username.trim().length > 0 &&
-    password.length >= 6 &&
+    password.length >= 8 &&
     (mode === "signin" || availability.state === "available");
 
   return (

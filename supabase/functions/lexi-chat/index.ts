@@ -1,4 +1,5 @@
 // Lexi — streaming chat assistant using Google Gemini 2.5 Flash directly
+import { requireUser } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -18,6 +19,9 @@ type ChatMsg = { role: "user" | "assistant"; content: string };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const auth = await requireUser(req, corsHeaders);
+  if (auth instanceof Response) return auth;
 
   try {
     const { messages } = await req.json();
