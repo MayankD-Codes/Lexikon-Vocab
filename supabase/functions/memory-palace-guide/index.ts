@@ -1,4 +1,5 @@
 // Generate short text-only memory-palace imagery for a word at a user's anchor
+import { requireUser } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -64,6 +65,9 @@ function sanitizeImagery(raw: string): string {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const _auth = await requireUser(req, corsHeaders);
+  if (_auth instanceof Response) return _auth;
 
   try {
     const { word, meaning, anchor, anchorStyle } = await req.json();
