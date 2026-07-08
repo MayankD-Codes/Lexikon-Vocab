@@ -147,7 +147,7 @@ const Auth = () => {
   const canSubmit =
     !busy &&
     username.trim().length > 0 &&
-    password.length >= 6 &&
+    password.length >= 8 &&
     (mode === "signin" || availability.state === "available");
 
   return (
