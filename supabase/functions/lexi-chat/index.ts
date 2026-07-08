@@ -1,4 +1,5 @@
 // Lexi — streaming chat assistant using Google Gemini 2.5 Flash directly
+import { requireUser } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
