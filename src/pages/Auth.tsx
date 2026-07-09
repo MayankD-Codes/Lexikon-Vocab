@@ -77,6 +77,10 @@ const Auth = () => {
       toast.error(v.reason);
       return;
     }
+    if (mode === "signup" && !passesAllChecks(password)) {
+      toast.error("Please meet all password requirements below.");
+      return;
+    }
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters.");
       return;
