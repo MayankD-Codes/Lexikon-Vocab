@@ -101,7 +101,15 @@ const Auth = () => {
         options: { data: { username: v.normalized } },
       });
       if (error) {
-        if (/duplicate|already/i.test(error.message)) {
+        const lower = (error.message || "").toLowerCase();
+        const isWeak =
+          (error as { code?: string }).code === "weak_password" ||
+          lower.includes("weak") || lower.includes("pwned") ||
+          lower.includes("breach") || lower.includes("compromised");
+        if (isWeak) {
+          setPasswordRejected(true);
+          toast.error(friendlyAuthError(error));
+        } else if (/duplicate|already/i.test(error.message)) {
           toast.error("Username already taken.");
         } else {
           toast.error(friendlyAuthError(error));
