@@ -161,7 +161,7 @@ const Auth = () => {
     !busy &&
     username.trim().length > 0 &&
     password.length >= 8 &&
-    (mode === "signin" || availability.state === "available");
+    (mode === "signin" || (availability.state === "available" && passesAllChecks(password) && !passwordRejected));
 
   return (
     <div className="min-h-screen bg-gradient-paper flex flex-col">
