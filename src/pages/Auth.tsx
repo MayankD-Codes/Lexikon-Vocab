@@ -12,7 +12,7 @@ import { friendlyAuthError } from "@/lib/friendlyError";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
-import PasswordStrength from "@/components/PasswordStrength";
+import PasswordStrength, { passesAllChecks } from "@/components/PasswordStrength";
 import { normalizeUsername, validateUsername, usernameToEmail, USERNAME_MAX } from "@/lib/username";
 
 type Availability =
@@ -33,6 +33,7 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [availability, setAvailability] = useState<Availability>({ state: "idle" });
+  const [passwordRejected, setPasswordRejected] = useState(false);
   const checkSeq = useRef(0);
 
   // Real-time username availability (signup only)
@@ -76,6 +77,10 @@ const Auth = () => {
       toast.error(v.reason);
       return;
     }
+    if (mode === "signup" && !passesAllChecks(password)) {
+      toast.error("Please meet all password requirements below.");
+      return;
+    }
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters.");
       return;
@@ -96,7 +101,15 @@ const Auth = () => {
         options: { data: { username: v.normalized } },
       });
       if (error) {
-        if (/duplicate|already/i.test(error.message)) {
+        const lower = (error.message || "").toLowerCase();
+        const isWeak =
+          (error as { code?: string }).code === "weak_password" ||
+          lower.includes("weak") || lower.includes("pwned") ||
+          lower.includes("breach") || lower.includes("compromised");
+        if (isWeak) {
+          setPasswordRejected(true);
+          toast.error(friendlyAuthError(error));
+        } else if (/duplicate|already/i.test(error.message)) {
           toast.error("Username already taken.");
         } else {
           toast.error(friendlyAuthError(error));
@@ -148,7 +161,7 @@ const Auth = () => {
     !busy &&
     username.trim().length > 0 &&
     password.length >= 8 &&
-    (mode === "signin" || availability.state === "available");
+    (mode === "signin" || (availability.state === "available" && passesAllChecks(password) && !passwordRejected));
 
   return (
     <div className="min-h-screen bg-gradient-paper flex flex-col">
@@ -212,10 +225,14 @@ const Auth = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                      placeholder="At least 6 characters"
+                      placeholder="At least 8 characters"
                       className="pl-9 pr-10"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (passwordRejected) setPasswordRejected(false);
+                      }}
+                      minLength={8}
                       required
                     />
                     <button
@@ -228,7 +245,9 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {mode === "signup" && <PasswordStrength password={password} />}
+                  {mode === "signup" && (
+                    <PasswordStrength password={password} serverRejected={passwordRejected} />
+                  )}
                 </div>
                 <Button type="submit" className="w-full h-11" disabled={!canSubmit}>
                   {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
