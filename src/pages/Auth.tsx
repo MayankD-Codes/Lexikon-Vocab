@@ -225,10 +225,14 @@ const Auth = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                      placeholder="At least 6 characters"
+                      placeholder="At least 8 characters"
                       className="pl-9 pr-10"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (passwordRejected) setPasswordRejected(false);
+                      }}
+                      minLength={8}
                       required
                     />
                     <button
@@ -241,7 +245,9 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {mode === "signup" && <PasswordStrength password={password} />}
+                  {mode === "signup" && (
+                    <PasswordStrength password={password} serverRejected={passwordRejected} />
+                  )}
                 </div>
                 <Button type="submit" className="w-full h-11" disabled={!canSubmit}>
                   {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
