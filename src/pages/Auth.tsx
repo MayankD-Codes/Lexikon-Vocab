@@ -33,6 +33,7 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [availability, setAvailability] = useState<Availability>({ state: "idle" });
+  const [passwordRejected, setPasswordRejected] = useState(false);
   const checkSeq = useRef(0);
 
   // Real-time username availability (signup only)
