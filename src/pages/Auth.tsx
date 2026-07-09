@@ -12,7 +12,7 @@ import { friendlyAuthError } from "@/lib/friendlyError";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
-import PasswordStrength from "@/components/PasswordStrength";
+import PasswordStrength, { passesAllChecks } from "@/components/PasswordStrength";
 import { normalizeUsername, validateUsername, usernameToEmail, USERNAME_MAX } from "@/lib/username";
 
 type Availability =
