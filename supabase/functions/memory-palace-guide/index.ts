@@ -111,18 +111,12 @@ Write the short mental scene now. 2 to 4 sentences. Plain text only.`;
 
     if (!resp.ok) {
       const t = await resp.text();
-      console.error("AI gateway error:", resp.status, t);
+      console.error("Gemini error:", resp.status, t);
       if (resp.status === 429) {
         return new Response(JSON.stringify({ error: "Lexi is busy. Try again shortly." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
-      }
-      if (resp.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Add credits in Settings → Workspace → Usage." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
       }
       return new Response(JSON.stringify({ error: "Lexi failed." }), {
         status: 500,
@@ -131,7 +125,9 @@ Write the short mental scene now. 2 to 4 sentences. Plain text only.`;
     }
 
     const data = await resp.json();
-    const rawImagery = (data?.choices?.[0]?.message?.content ?? "").toString();
+    const rawImagery = (data?.candidates?.[0]?.content?.parts
+      ?.map((p: { text?: string }) => p?.text ?? "")
+      .join("") ?? "").toString();
     const imagery = sanitizeImagery(rawImagery);
 
     if (!imagery) {
