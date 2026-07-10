@@ -25,20 +25,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (word.length > 100) {
-      return new Response(JSON.stringify({ error: "Word too long (max 100 chars)" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (context !== undefined && context !== null) {
-      if (typeof context !== "string" || context.length > 2000) {
-        return new Response(JSON.stringify({ error: "Context must be a string up to 2000 chars" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");

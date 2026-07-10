@@ -31,26 +31,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (messages.length > 100) {
-      return new Response(JSON.stringify({ error: "Too many messages (max 100)" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    for (const m of messages as ChatMsg[]) {
-      if (!m || typeof m.content !== "string" || (m.role !== "user" && m.role !== "assistant")) {
-        return new Response(JSON.stringify({ error: "Invalid message format" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (m.content.length > 4000) {
-        return new Response(JSON.stringify({ error: "Message too long (max 4000 chars)" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");

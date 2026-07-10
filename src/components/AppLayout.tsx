@@ -3,7 +3,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import LexiChat from "@/components/LexiChat";
-import WelcomeTour from "@/components/WelcomeTour";
 
 const titles: Record<string, string> = {
   "/": "Home",
@@ -43,7 +42,6 @@ const AppLayout = () => {
           </main>
         </div>
         <LexiChat />
-        <WelcomeTour />
       </div>
     </SidebarProvider>
   );

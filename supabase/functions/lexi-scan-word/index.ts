@@ -25,24 +25,9 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // ~3 MB base64 cap (~2.25 MB raw)
-    const MAX_IMAGE_B64 = 3 * 1024 * 1024;
-    if (image.length > MAX_IMAGE_B64) {
-      return new Response(JSON.stringify({ error: "Image too large (max ~2.25 MB)" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
     // Strip data URL prefix if present
     const base64 = image.includes(",") ? image.split(",")[1] : image;
-    const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
     const mt = typeof mimeType === "string" && mimeType ? mimeType : "image/jpeg";
-    if (!ALLOWED_MIME.has(mt)) {
-      return new Response(JSON.stringify({ error: "Unsupported image type. Use JPEG, PNG, or WebP." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");

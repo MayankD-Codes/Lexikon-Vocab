@@ -85,7 +85,6 @@ const LexiChat = () => {
       {/* Floating bubble */}
       <button
         type="button"
-        data-tour="lexi-chat"
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close Lexi" : "Open Lexi"}
         className={cn(

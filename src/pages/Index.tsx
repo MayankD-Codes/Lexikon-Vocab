@@ -77,12 +77,12 @@ const Index = () => {
               Capture every new word you discover — with meaning, pronunciation, examples and personal notes. Build a vocabulary that's truly yours.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" className="text-base h-12 px-8 shadow-elegant" data-tour="add-word">
+              <Button asChild size="lg" className="text-base h-12 px-8 shadow-elegant">
                 <Link to="/add">
                   <Plus className="h-5 w-5" /> Add a New Word
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-base h-12 px-8" data-tour="dictionary">
+              <Button asChild size="lg" variant="outline" className="text-base h-12 px-8">
                 <Link to="/dictionary">
                   <Library className="h-5 w-5" /> Browse Dictionary
                 </Link>
@@ -138,7 +138,7 @@ const Index = () => {
         )}
 
         {/* Daily Quiz banner */}
-        <section className="container pb-4" data-tour="quiz">
+        <section className="container pb-4">
           <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-card flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             <div className="h-12 w-12 rounded-xl bg-gradient-warm flex items-center justify-center shadow-soft shrink-0">
               <Brain className="h-6 w-6 text-primary-foreground" />

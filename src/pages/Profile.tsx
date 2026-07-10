@@ -213,23 +213,6 @@ const Profile = () => {
           )}
         </CardContent>
       </Card>
-
-      <Card className="mt-6 shadow-card">
-        <CardHeader>
-          <CardTitle className="font-display">Product tour</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            Replay the welcome walkthrough anytime to rediscover Lexikon's features.
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => window.dispatchEvent(new CustomEvent("lexikon:start-tour"))}
-          >
-            Replay tour
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 };
