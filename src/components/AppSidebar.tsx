@@ -22,16 +22,16 @@ import { supabase } from "@/integrations/supabase/client";
 const primaryItems = [
   { title: "Home", url: "/", icon: Home, end: true },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Daily Quiz", url: "/quiz", icon: Brain },
-  { title: "Memory Palace", url: "/memory-palace", icon: Castle },
+  { title: "Daily Quiz", url: "/quiz", icon: Brain, tour: "quiz" },
+  { title: "Memory Palace", url: "/memory-palace", icon: Castle, tour: "memory-palace" },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
-  { title: "Community", url: "/community", icon: MessagesSquare },
+  { title: "Community", url: "/community", icon: MessagesSquare, tour: "community" },
 ];
 
 const libraryItems = [
-  { title: "Dictionary", url: "/dictionary", icon: Library },
-  { title: "Add Word", url: "/add", icon: Plus },
-  { title: "Capture Word", url: "/capture", icon: Camera },
+  { title: "Dictionary", url: "/dictionary", icon: Library, tour: "dictionary" },
+  { title: "Add Word", url: "/add", icon: Plus, tour: "add-word" },
+  { title: "Capture Word", url: "/capture", icon: Camera, tour: "capture-word" },
 ];
 
 export const AppSidebar = () => {
