@@ -6,6 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const MODEL = "gemini-2.5-flash";
+
 const SYSTEM_PROMPT = `You are Lexi, a memory coach using the Method of Loci (memory palace).
 Given a user's personal anchor (a place or moment they recall instantly) and an English word,
 write a SHORT mental scene of EXACTLY 2 to 4 sentences (max ~55 words total) that fuses the
