@@ -138,7 +138,7 @@ const Index = () => {
         )}
 
         {/* Daily Quiz banner */}
-        <section className="container pb-4">
+        <section className="container pb-4" data-tour="quiz">
           <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-card flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             <div className="h-12 w-12 rounded-xl bg-gradient-warm flex items-center justify-center shadow-soft shrink-0">
               <Brain className="h-6 w-6 text-primary-foreground" />
