@@ -11,47 +11,30 @@ const steps: Step[] = [
     placement: "center",
     title: "Welcome to Lexikon 👋",
     content:
-      "Your personal English vocabulary companion. Take a quick 60-second tour to see how everything works.",
+      "Your personal English vocabulary companion. Take a quick 30-second tour to see how it works.",
   },
   {
     target: '[data-tour="add-word"]',
     title: "1. Add words you meet",
     content:
-      "Every time you discover a new word, save it here with its meaning, pronunciation and the sentence you found it in.",
-  },
-  {
-    target: '[data-tour="capture-word"]',
-    title: "2. Or capture with your camera",
-    content:
-      "Snap a photo of any word in a book, article or screen — Lexi will read it and fill in the details for you.",
+      "Every time you discover a new word, save it here with its meaning, pronunciation and the sentence you found it in. You can also snap a photo to auto-capture words from books or screens.",
   },
   {
     target: '[data-tour="dictionary"]',
-    title: "3. Your personal dictionary",
+    title: "2. Your personal dictionary",
     content:
       "Every word you save lives here. Search, filter and revisit your growing collection anytime.",
   },
   {
     target: '[data-tour="quiz"]',
-    title: "4. Daily quiz to remember",
+    title: "3. Daily quiz to remember",
     content:
-      "Once you've saved 10 words, a personalized 7-question quiz unlocks every day to help words stick.",
-  },
-  {
-    target: '[data-tour="memory-palace"]',
-    title: "5. Build a Memory Palace",
-    content:
-      "Place words inside rooms of an imaginary palace — a proven technique for long-term recall.",
-  },
-  {
-    target: '[data-tour="community"]',
-    title: "6. Learn with others",
-    content:
-      "Share progress, climb the leaderboard and see what fellow word-lovers are learning.",
+      "Once you've saved 10 words, a personalized 7-question quiz unlocks daily to help words stick. You'll also find a Memory Palace and Community in the sidebar.",
+    placement: "top",
   },
   {
     target: '[data-tour="lexi-chat"]',
-    title: "Meet Lexi, your AI tutor",
+    title: "4. Meet Lexi, your AI tutor",
     content:
       "Stuck on a word? Ask Lexi anytime — it explains meanings, gives examples and quizzes you on demand.",
     placement: "left",
@@ -61,7 +44,7 @@ const steps: Step[] = [
     placement: "center",
     title: "You're all set ✨",
     content:
-      "Start by adding your first word. Small daily habits build a lifelong vocabulary.",
+      "Start by adding your first word. Small daily habits build a lifelong vocabulary. You can replay this tour anytime from your Profile.",
   },
 ];
 
