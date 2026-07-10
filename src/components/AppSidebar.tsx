@@ -22,16 +22,16 @@ import { supabase } from "@/integrations/supabase/client";
 const primaryItems = [
   { title: "Home", url: "/", icon: Home, end: true },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Daily Quiz", url: "/quiz", icon: Brain },
-  { title: "Memory Palace", url: "/memory-palace", icon: Castle },
+  { title: "Daily Quiz", url: "/quiz", icon: Brain, tour: "quiz" },
+  { title: "Memory Palace", url: "/memory-palace", icon: Castle, tour: "memory-palace" },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
-  { title: "Community", url: "/community", icon: MessagesSquare },
+  { title: "Community", url: "/community", icon: MessagesSquare, tour: "community" },
 ];
 
 const libraryItems = [
-  { title: "Dictionary", url: "/dictionary", icon: Library },
-  { title: "Add Word", url: "/add", icon: Plus },
-  { title: "Capture Word", url: "/capture", icon: Camera },
+  { title: "Dictionary", url: "/dictionary", icon: Library, tour: "dictionary" },
+  { title: "Add Word", url: "/add", icon: Plus, tour: "add-word" },
+  { title: "Capture Word", url: "/capture", icon: Camera, tour: "capture-word" },
 ];
 
 export const AppSidebar = () => {
@@ -81,13 +81,14 @@ export const AppSidebar = () => {
   const label = displayName || (username ? `@${username}` : "Account");
   const initials = (displayName || username || "?").trim().slice(0, 2).toUpperCase();
 
-  const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
+  const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean; tour?: string }) => (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild tooltip={item.title}>
         <NavLink
           to={item.url}
           end={item.end}
           onClick={handleNavClick}
+          data-tour={item.tour}
           className={({ isActive }) =>
             [
               "flex items-center gap-3 rounded-md transition-colors",
