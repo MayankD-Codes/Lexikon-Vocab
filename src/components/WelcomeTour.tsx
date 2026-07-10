@@ -126,7 +126,7 @@ const WelcomeTour = () => {
       styles={{
         tooltip: { borderRadius: 12, fontFamily: "Inter, sans-serif" },
         tooltipTitle: { fontFamily: "Fraunces, serif", fontSize: 18 },
-        buttonNext: { borderRadius: 8, padding: "8px 14px" },
+        buttonPrimary: { borderRadius: 8, padding: "8px 14px" },
       }}
     />
   );
