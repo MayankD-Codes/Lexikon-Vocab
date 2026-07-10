@@ -84,26 +84,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const userMsg = `Anchor: "${anchor.trim()}"${anchorStyle ? ` (style: ${anchorStyle})` : ""}
 Word: "${word.trim()}"${meaning ? `\nMeaning: ${meaning}` : ""}
 
 Write the short mental scene now. 2 to 4 sentences. Plain text only.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+    const resp = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
+        "x-goog-api-key": GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMsg },
-        ],
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ role: "user", parts: [{ text: userMsg }] }],
+        generationConfig: { temperature: 0.7 },
       }),
     });
 
