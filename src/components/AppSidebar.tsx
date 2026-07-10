@@ -81,13 +81,14 @@ export const AppSidebar = () => {
   const label = displayName || (username ? `@${username}` : "Account");
   const initials = (displayName || username || "?").trim().slice(0, 2).toUpperCase();
 
-  const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean }) => (
+  const renderItem = (item: { title: string; url: string; icon: typeof Home; end?: boolean; tour?: string }) => (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild tooltip={item.title}>
         <NavLink
           to={item.url}
           end={item.end}
           onClick={handleNavClick}
+          data-tour={item.tour}
           className={({ isActive }) =>
             [
               "flex items-center gap-3 rounded-md transition-colors",
