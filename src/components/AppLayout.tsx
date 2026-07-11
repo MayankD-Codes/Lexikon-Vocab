@@ -43,6 +43,7 @@ const AppLayout = () => {
           </main>
         </div>
         <LexiChat />
+        <WelcomeTour />
       </div>
     </SidebarProvider>
   );
