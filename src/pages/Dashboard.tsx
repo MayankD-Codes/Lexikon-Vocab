@@ -223,7 +223,8 @@ const Dashboard = () => {
   const avatarUrl = profile?.avatar_url;
 
   return (
-    <div className="container py-6 sm:py-10 space-y-6 max-w-6xl">
+    <div className="container py-6 sm:py-10 space-y-6 max-w-6xl min-w-0 overflow-x-hidden">
+
       <SEO
         title="Dashboard — Lexikon"
         description="Track your vocabulary progress: total words, quiz streak, accuracy trends, mastery breakdown and weakest words."
