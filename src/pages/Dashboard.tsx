@@ -223,7 +223,8 @@ const Dashboard = () => {
   const avatarUrl = profile?.avatar_url;
 
   return (
-    <div className="container py-6 sm:py-10 space-y-6 max-w-6xl">
+    <div className="container py-6 sm:py-10 space-y-6 max-w-6xl min-w-0 overflow-x-hidden">
+
       <SEO
         title="Dashboard — Lexikon"
         description="Track your vocabulary progress: total words, quiz streak, accuracy trends, mastery breakdown and weakest words."
@@ -513,13 +514,13 @@ const Panel = ({
   children: React.ReactNode;
   empty?: string | null;
 }) => (
-  <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-card">
+  <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-card min-w-0 overflow-hidden">
     <div className="flex items-center gap-2 mb-3">
-      {icon && <span className="text-primary">{icon}</span>}
-      <h3 className="font-display text-base font-semibold">{title}</h3>
+      {icon && <span className="text-primary shrink-0">{icon}</span>}
+      <h3 className="font-display text-base font-semibold truncate">{title}</h3>
     </div>
     {empty ? (
-      <div className="text-sm text-muted-foreground py-6 text-center">{empty}</div>
+      <div className="text-sm text-muted-foreground py-6 text-center break-words">{empty}</div>
     ) : (
       children
     )}

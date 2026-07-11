@@ -102,7 +102,9 @@ const LexiChat = () => {
           className={cn(
             "fixed z-50 bg-card border border-border/60 shadow-xl flex flex-col",
             "inset-x-2 bottom-20 top-16 rounded-2xl",
-            "sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-24 sm:w-[380px] sm:h-[560px]",
+            "sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-24",
+            "sm:w-[min(380px,calc(100vw-3rem))] sm:h-[min(560px,calc(100vh-8rem))]",
+            "sm:max-w-[380px]",
           )}
           role="dialog"
           aria-label="Lexi chat"
@@ -133,18 +135,18 @@ const LexiChat = () => {
               <div
                 key={i}
                 className={cn(
-                  "max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed",
+                  "max-w-[85%] w-fit rounded-2xl px-3 py-2 text-sm leading-relaxed break-words",
                   m.role === "user"
                     ? "ml-auto bg-primary text-primary-foreground"
                     : "mr-auto bg-secondary text-secondary-foreground",
                 )}
               >
                 {m.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 break-words">
                     <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
                   </div>
                 ) : (
-                  m.content
+                  <span className="whitespace-pre-wrap break-words">{m.content}</span>
                 )}
               </div>
             ))}
