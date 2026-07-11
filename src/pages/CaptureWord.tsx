@@ -48,11 +48,14 @@ const CaptureWord = () => {
   const [scanning, setScanning] = useState(false);
   const [words, setWords] = useState<string[]>([]);
   const [rawText, setRawText] = useState<string>("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [addingBulk, setAddingBulk] = useState(false);
 
   const reset = () => {
     setPreview(null);
     setWords([]);
     setRawText("");
+    setSelected(new Set());
     if (cameraRef.current) cameraRef.current.value = "";
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -65,6 +68,7 @@ const CaptureWord = () => {
     }
     setWords([]);
     setRawText("");
+    setSelected(new Set());
     setScanning(true);
     try {
       const { data, mimeType } = await fileToCompressedBase64(file);
@@ -78,7 +82,7 @@ const CaptureWord = () => {
       setWords(found);
       setRawText(typeof res?.raw_text === "string" ? res.raw_text : "");
       if (found.length === 0) toast.info("Lexi didn't spot any vocabulary in that photo.");
-      else toast.success(`Found ${found.length} word${found.length === 1 ? "" : "s"}. Tap one to add it.`);
+      else toast.success(`Found ${found.length} word${found.length === 1 ? "" : "s"}. Select the ones you want to add.`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't scan that image.");
     } finally {
@@ -86,9 +90,65 @@ const CaptureWord = () => {
     }
   };
 
-  const pickWord = (w: string) => {
+  const toggleWord = (w: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(w)) next.delete(w);
+      else next.add(w);
+      return next;
+    });
+  };
+
+  const addSingle = (w: string) => {
     navigate(`/add?word=${encodeURIComponent(w)}&ask=1`);
   };
+
+  const addSelected = async () => {
+    const list = Array.from(selected);
+    if (list.length === 0) return;
+    if (list.length === 1) {
+      addSingle(list[0]);
+      return;
+    }
+    setAddingBulk(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in first.");
+        return;
+      }
+      const rows = await Promise.all(
+        list.map(async (w) => {
+          try {
+            const { data } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
+            const d = (data ?? {}) as Record<string, unknown>;
+            return {
+              user_id: user.id,
+              word: w,
+              pronunciation: (d.pronunciation as string) ?? null,
+              meaning_english: (d.meaning_english as string) ?? null,
+              meaning_hindi: (d.meaning_hindi as string) ?? null,
+              part_of_speech: (d.part_of_speech as string) ?? null,
+              example_sentence: (d.example_sentence as string) ?? null,
+              synonyms: (d.synonyms as string) ?? null,
+              antonyms: (d.antonyms as string) ?? null,
+            };
+          } catch {
+            return { user_id: user.id, word: w };
+          }
+        }),
+      );
+      const { error } = await supabase.from("words").insert(rows as never);
+      if (error) throw error;
+      toast.success(`Added ${rows.length} words to your dictionary`);
+      navigate("/dictionary");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't add words.");
+    } finally {
+      setAddingBulk(false);
+    }
+  };
+
 
   return (
     <main className="container py-6 sm:py-10 max-w-2xl">
