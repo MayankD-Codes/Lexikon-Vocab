@@ -102,7 +102,9 @@ const LexiChat = () => {
           className={cn(
             "fixed z-50 bg-card border border-border/60 shadow-xl flex flex-col",
             "inset-x-2 bottom-20 top-16 rounded-2xl",
-            "sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-24 sm:w-[380px] sm:h-[560px]",
+            "sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-24",
+            "sm:w-[min(380px,calc(100vw-3rem))] sm:h-[min(560px,calc(100vh-8rem))]",
+            "sm:max-w-[380px]",
           )}
           role="dialog"
           aria-label="Lexi chat"
