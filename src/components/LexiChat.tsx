@@ -135,18 +135,18 @@ const LexiChat = () => {
               <div
                 key={i}
                 className={cn(
-                  "max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed",
+                  "max-w-[85%] w-fit rounded-2xl px-3 py-2 text-sm leading-relaxed break-words",
                   m.role === "user"
                     ? "ml-auto bg-primary text-primary-foreground"
                     : "mr-auto bg-secondary text-secondary-foreground",
                 )}
               >
                 {m.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 break-words">
                     <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
                   </div>
                 ) : (
-                  m.content
+                  <span className="whitespace-pre-wrap break-words">{m.content}</span>
                 )}
               </div>
             ))}
