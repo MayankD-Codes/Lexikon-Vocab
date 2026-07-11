@@ -1,6 +1,8 @@
 // Shared SSE stream helpers for Lexi edge functions.
+import { supabase } from "@/integrations/supabase/client";
+
 const BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
-const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const PUB_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export type LexiMsg = { role: "user" | "assistant"; content: string };
 
@@ -10,22 +12,41 @@ interface StreamOpts {
   signal?: AbortSignal;
 }
 
+async function getAuthToken(): Promise<string> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? PUB_KEY;
+}
+
+function friendlyStatusMessage(status: number, fallback: string): string {
+  if (status === 401) return "Please sign in again to chat with Lexi.";
+  if (status === 429) return "Lexi is getting a lot of questions right now. Try again in a moment.";
+  if (status === 402) return "Lexi's AI credits are exhausted. Please try again later.";
+  if (status >= 500) return "Lexi hit a server hiccup. Please try again.";
+  return fallback;
+}
+
 async function streamSSE(url: string, body: unknown, opts: StreamOpts) {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Please sign in to chat with Lexi.");
+
   const resp = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${KEY}`,
+      Authorization: `Bearer ${token}`,
+      apikey: PUB_KEY,
     },
     body: JSON.stringify(body),
     signal: opts.signal,
   });
 
   if (!resp.ok || !resp.body) {
-    let msg = "Lexi had trouble responding.";
+    let msg = friendlyStatusMessage(resp.status, "Lexi had trouble responding.");
     try {
       const data = await resp.json();
-      if (data?.error) msg = data.error;
+      if (data?.error && typeof data.error === "string" && data.error !== "Unauthorized") {
+        msg = data.error;
+      }
     } catch { /* ignore */ }
     throw new Error(msg);
   }
