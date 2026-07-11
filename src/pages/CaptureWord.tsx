@@ -238,20 +238,50 @@ const CaptureWord = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-medium">Tap a word to add it to your dictionary</p>
+                  <p className="text-sm font-medium">
+                    Tap words to select multiple, then add them at once.
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {words.map((w) => (
-                    <button
-                      key={w}
-                      type="button"
-                      onClick={() => pickWord(w)}
-                      className="group inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors text-sm font-medium"
-                    >
-                      {w}
-                      <ArrowRight className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  ))}
+                  {words.map((w) => {
+                    const isSelected = selected.has(w);
+                    return (
+                      <button
+                        key={w}
+                        type="button"
+                        onClick={() => toggleWord(w)}
+                        aria-pressed={isSelected}
+                        className={
+                          "group inline-flex items-center gap-1 px-3 py-1.5 rounded-full border transition-colors text-sm font-medium " +
+                          (isSelected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border hover:bg-primary/10 hover:border-primary")
+                        }
+                      >
+                        {w}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    onClick={addSelected}
+                    disabled={selected.size === 0 || addingBulk}
+                    className="flex-1 min-w-[10rem]"
+                  >
+                    {addingBulk ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" /> Adding…</>
+                    ) : selected.size <= 1 ? (
+                      <>Add {selected.size === 1 ? "1 word" : "selected"} <ArrowRight className="h-4 w-4" /></>
+                    ) : (
+                      <>Add {selected.size} words <ArrowRight className="h-4 w-4" /></>
+                    )}
+                  </Button>
+                  {selected.size > 0 && (
+                    <Button variant="ghost" onClick={() => setSelected(new Set())} disabled={addingBulk}>
+                      Clear
+                    </Button>
+                  )}
                 </div>
                 {rawText && (
                   <details className="text-xs text-muted-foreground">
