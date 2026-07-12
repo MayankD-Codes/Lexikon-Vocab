@@ -66,14 +66,32 @@ const Profile = () => {
       return;
     }
     setSaving(true);
-    const { error } = await supabase
+    // Use upsert to be resilient if the profile row is missing (defensive).
+    const { data, error } = await supabase
       .from("profiles")
-      .update({ display_name: parsed.data })
-      .eq("user_id", user.id);
+      .upsert(
+        {
+          user_id: user.id,
+          display_name: parsed.data,
+          username: username || `user_${user.id.slice(0, 8)}`,
+        },
+        { onConflict: "user_id" },
+      )
+      .select("display_name, avatar_url, username")
+      .single();
     setSaving(false);
-    if (error) toast.error(friendlyError(error, "Couldn't update your profile."));
-    else toast.success("Profile updated");
+    if (error) {
+      toast.error(friendlyError(error, "Couldn't update your profile."));
+      return;
+    }
+    if (data) {
+      setDisplayName(data.display_name ?? "");
+      setUsername(data.username ?? "");
+      setAvatarUrl(data.avatar_url ?? null);
+    }
+    toast.success("Profile updated");
   };
+
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
