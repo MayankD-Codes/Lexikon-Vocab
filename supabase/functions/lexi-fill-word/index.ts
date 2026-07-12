@@ -1,12 +1,14 @@
-// Lexi — auto-fill word details using Google Gemini 2.5 Flash with structured JSON output
+// Lexi — auto-fill word details using Gemini with multi-key failover + structured JSON
 import { requireUser } from "../_shared/auth.ts";
+import { callGemini, extractText, geminiErrorResponse } from "../_shared/gemini.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-flash-latest";
 
 const SYSTEM_PROMPT =
   "You are Lexi, an English vocabulary expert. Fill the dictionary entry for the given word. Be accurate and concise. Use the most common modern meaning. For Hindi meaning, give a short natural translation in Devanagari (or transliteration if untranslatable).";
@@ -25,12 +27,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
-
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
     const responseSchema = {
       type: "OBJECT",
@@ -51,13 +47,10 @@ Deno.serve(async (req) => {
       required: ["meaning_english", "example_sentence", "part_of_speech"],
     };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
+    const response = await callGemini({
+      model: MODEL,
+      method: "generateContent",
+      body: {
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [{ role: "user", parts: [{ text: `Word: ${word.trim()}` }] }],
         generationConfig: {
@@ -65,35 +58,18 @@ Deno.serve(async (req) => {
           responseMimeType: "application/json",
           responseSchema,
         },
-      }),
+      },
     });
 
-    if (!response.ok) {
-      const t = await response.text();
-      console.error("Gemini error:", response.status, t);
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Lexi is busy. Try again shortly." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "Lexi failed to fetch this word." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts
-      ?.map((p: { text?: string }) => p?.text ?? "")
-      .join("") ?? "";
+    const text = extractText(data);
 
     if (!text) {
       console.error("Empty Gemini response:", JSON.stringify(data));
-      return new Response(JSON.stringify({ error: "Lexi returned no data." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Lexi couldn't find details for that word. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     let args: Record<string, unknown>;
@@ -101,20 +77,16 @@ Deno.serve(async (req) => {
       args = JSON.parse(text);
     } catch (e) {
       console.error("JSON parse error:", e, "raw:", text);
-      return new Response(JSON.stringify({ error: "Lexi returned malformed data." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Lexi returned an unexpected response. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     return new Response(JSON.stringify(args), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("lexi-fill-word error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return geminiErrorResponse(e, corsHeaders);
   }
 });

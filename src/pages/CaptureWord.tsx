@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Upload, Loader2, ArrowLeft, Sparkles, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+
 
 const MAX_DIM = 1600;
 const JPEG_QUALITY = 0.85;
@@ -73,12 +75,12 @@ const CaptureWord = () => {
     try {
       const { data, mimeType } = await fileToCompressedBase64(file);
       setPreview(data);
-      const { data: res, error } = await supabase.functions.invoke("lexi-scan-word", {
-        body: { image: data, mimeType },
-      });
-      if (error) throw error;
-      if (res?.error) throw new Error(res.error);
-      const found: string[] = Array.isArray(res?.words) ? res.words : [];
+      const { data: res, error } = await invokeFunction<{ words?: string[]; raw_text?: string }>(
+        "lexi-scan-word",
+        { image: data, mimeType },
+      );
+      if (error) throw new Error(error);
+      const found: string[] = Array.isArray(res?.words) ? res!.words! : [];
       setWords(found);
       setRawText(typeof res?.raw_text === "string" ? res.raw_text : "");
       if (found.length === 0) toast.info("Lexi didn't spot any vocabulary in that photo.");
@@ -89,6 +91,7 @@ const CaptureWord = () => {
       setScanning(false);
     }
   };
+
 
   const toggleWord = (w: string) => {
     setSelected((prev) => {
@@ -120,8 +123,9 @@ const CaptureWord = () => {
       const rows = await Promise.all(
         list.map(async (w) => {
           try {
-            const { data } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
+            const { data } = await invokeFunction<Record<string, unknown>>("lexi-fill-word", { word: w });
             const d = (data ?? {}) as Record<string, unknown>;
+
             return {
               user_id: user.id,
               word: w,

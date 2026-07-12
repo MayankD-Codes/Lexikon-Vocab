@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import type { Word } from "@/lib/types";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
+
 
 const schema = z.object({
   word: z.string().trim().min(1, "Word is required").max(100),
@@ -131,22 +133,23 @@ const EditWord = () => {
     }
     setAskingLexi(true);
     try {
-      const { data, error } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const { data, error } = await invokeFunction<Record<string, string | undefined>>("lexi-fill-word", { word: w });
+      if (error) throw new Error(error);
+      const d = data ?? {};
       setForm((f) => ({
         ...f,
-        pronunciation: data.pronunciation ?? f.pronunciation,
-        spelling: data.spelling ?? f.spelling,
-        meaning_english: data.meaning_english ?? f.meaning_english,
-        meaning_hindi: data.meaning_hindi ?? f.meaning_hindi,
-        word_forms: data.word_forms ?? f.word_forms,
-        example_sentence: data.example_sentence ?? f.example_sentence,
-        synonyms: data.synonyms ?? f.synonyms,
-        antonyms: data.antonyms ?? f.antonyms,
-        ...mapPosString(data.part_of_speech, w),
+        pronunciation: d.pronunciation ?? f.pronunciation,
+        spelling: d.spelling ?? f.spelling,
+        meaning_english: d.meaning_english ?? f.meaning_english,
+        meaning_hindi: d.meaning_hindi ?? f.meaning_hindi,
+        word_forms: d.word_forms ?? f.word_forms,
+        example_sentence: d.example_sentence ?? f.example_sentence,
+        synonyms: d.synonyms ?? f.synonyms,
+        antonyms: d.antonyms ?? f.antonyms,
+        ...mapPosString(d.part_of_speech, w),
       }));
       toast.success("Lexi refilled. Review before saving.");
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lexi could not fetch this word");
     } finally {

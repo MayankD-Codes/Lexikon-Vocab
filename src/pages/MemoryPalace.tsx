@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -235,22 +237,21 @@ const MemoryPalace = () => {
     setEncodeLoading(true);
     setEncodeImagery("");
     try {
-      const { data, error } = await supabase.functions.invoke("memory-palace-guide", {
-        body: {
-          word: word.word,
-          meaning: word.meaning_english,
-          anchor: anchor.name,
-          anchorStyle: anchor.style,
-        },
+      const { data, error } = await invokeFunction<{ imagery?: string }>("memory-palace-guide", {
+        word: word.word,
+        meaning: word.meaning_english,
+        anchor: anchor.name,
+        anchorStyle: anchor.style,
       });
-      if (error) throw error;
-      const imagery = (data as { imagery?: string })?.imagery?.trim();
-      if (!imagery) throw new Error("Empty response");
+      if (error) throw new Error(error);
+      const imagery = data?.imagery?.trim();
+      if (!imagery) throw new Error("Lexi couldn't picture that scene. Please try again.");
       setEncodeImagery(imagery);
     } catch (e: unknown) {
       console.error(e);
-      const msg = e instanceof Error ? e.message : "Lexi failed";
+      const msg = e instanceof Error ? e.message : "Lexi is currently busy. Please try again in a moment.";
       toast.error(msg);
+
     } finally {
       setEncodeLoading(false);
     }
