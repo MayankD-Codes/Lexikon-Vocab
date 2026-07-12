@@ -1,5 +1,6 @@
 // Generate short text-only memory-palace imagery for a word at a user's anchor
 import { requireUser } from "../_shared/auth.ts";
+import { callGemini, extractText, geminiErrorResponse } from "../_shared/gemini.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -7,6 +8,7 @@ const corsHeaders = {
 };
 
 const MODEL = "gemini-2.5-flash";
+
 
 const SYSTEM_PROMPT = `You are Lexi, a memory coach using the Method of Loci (memory palace).
 Given a user's personal anchor (a place or moment they recall instantly) and an English word,
