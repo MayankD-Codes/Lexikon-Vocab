@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
 import { friendlyError } from "@/lib/friendlyError";
+
 
 const schema = z.object({
   word: z.string().trim().min(1, "Word is required").max(100),
