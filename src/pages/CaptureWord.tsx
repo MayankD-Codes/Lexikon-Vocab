@@ -123,8 +123,9 @@ const CaptureWord = () => {
       const rows = await Promise.all(
         list.map(async (w) => {
           try {
-            const { data } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
+            const { data } = await invokeFunction<Record<string, unknown>>("lexi-fill-word", { word: w });
             const d = (data ?? {}) as Record<string, unknown>;
+
             return {
               user_id: user.id,
               word: w,
