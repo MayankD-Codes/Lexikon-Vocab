@@ -8,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-flash-latest";
 
 const SYSTEM_PROMPT =
   "You are Lexi, a vocabulary assistant. The user photographed some text (a book page, sign, screen, note). Extract UNIQUE, meaningful English vocabulary words a learner might want to save — prefer nouns, verbs, adjectives, adverbs. Skip trivial stopwords (the, a, is, of, and, etc.), numbers, names, and gibberish. Return each word in its base/dictionary form when obvious. Max 20 words. Also return the full raw text you can read.";

@@ -15,7 +15,7 @@ const SYSTEM_PROMPT = `You are Lexi, the friendly AI vocabulary coach inside the
 - Never invent definitions. If unsure, say so briefly.
 - Do not mention you are an AI model name; just say you are Lexi.`;
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-flash-latest";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 

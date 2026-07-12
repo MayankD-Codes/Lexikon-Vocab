@@ -8,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-flash-latest";
 
 const SYSTEM_PROMPT =
   "You are Lexi, an English vocabulary expert. Fill the dictionary entry for the given word. Be accurate and concise. Use the most common modern meaning. For Hindi meaning, give a short natural translation in Devanagari (or transliteration if untranslatable).";
