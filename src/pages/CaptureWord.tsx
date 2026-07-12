@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Upload, Loader2, ArrowLeft, Sparkles, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+
 
 const MAX_DIM = 1600;
 const JPEG_QUALITY = 0.85;
