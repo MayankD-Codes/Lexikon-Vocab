@@ -1,5 +1,7 @@
-// Lexi — deep explanation for a saved word using Google Gemini 2.5 Flash directly
+// Lexi — deep explanation for a saved word using Gemini with multi-key failover
 import { requireUser } from "../_shared/auth.ts";
+import { callGemini, geminiErrorResponse } from "../_shared/gemini.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -26,9 +28,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
-
     const userMsg = `Give me a deep but concise explanation of the English word **${word}**.
 Cover (use markdown headings):
 1. Meaning in plain English
@@ -39,35 +38,22 @@ Cover (use markdown headings):
 
 ${context ? `Saved notes for context:\n${context}` : ""}`;
 
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse`;
-
-    const upstream = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
+    const upstream = await callGemini({
+      model: MODEL,
+      method: "streamGenerateContent",
+      stream: true,
+      body: {
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [{ role: "user", parts: [{ text: userMsg }] }],
         generationConfig: { temperature: 0.6 },
-      }),
+      },
     });
 
-    if (!upstream.ok || !upstream.body) {
-      const t = await upstream.text();
-      console.error("Gemini error:", upstream.status, t);
-      if (upstream.status === 429) {
-        return new Response(JSON.stringify({ error: "Lexi is busy. Try again shortly." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "Lexi failed." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!upstream.body) {
+      return new Response(
+        JSON.stringify({ error: "Lexi is currently busy. Please try again in a moment." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const reader = upstream.body.getReader();
@@ -116,10 +102,6 @@ ${context ? `Saved notes for context:\n${context}` : ""}`;
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
-    console.error("lexi-explain-word error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return geminiErrorResponse(e, corsHeaders);
   }
 });
