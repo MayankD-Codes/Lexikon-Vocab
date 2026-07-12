@@ -1,5 +1,7 @@
-// Lexi — extract English words from a photo using Gemini 2.5 Flash vision
+// Lexi — extract English words from a photo using Gemini vision with multi-key failover
 import { requireUser } from "../_shared/auth.ts";
+import { callGemini, extractText, geminiErrorResponse } from "../_shared/gemini.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -25,15 +27,8 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // Strip data URL prefix if present
     const base64 = image.includes(",") ? image.split(",")[1] : image;
     const mt = typeof mimeType === "string" && mimeType ? mimeType : "image/jpeg";
-
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
-
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
     const responseSchema = {
       type: "OBJECT",
@@ -48,13 +43,10 @@ Deno.serve(async (req) => {
       required: ["words"],
     };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
+    const response = await callGemini({
+      model: MODEL,
+      method: "generateContent",
+      body: {
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [{
           role: "user",
@@ -68,34 +60,17 @@ Deno.serve(async (req) => {
           responseMimeType: "application/json",
           responseSchema,
         },
-      }),
+      },
     });
 
-    if (!response.ok) {
-      const t = await response.text();
-      console.error("Gemini error:", response.status, t);
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Lexi is busy. Try again shortly." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "Lexi couldn't read this image." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts
-      ?.map((p: { text?: string }) => p?.text ?? "")
-      .join("") ?? "";
+    const text = extractText(data);
 
     if (!text) {
-      return new Response(JSON.stringify({ error: "Lexi found no text in this image." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Lexi couldn't read any words from this image. Try a clearer photo." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     let args: { words?: string[]; raw_text?: string };
@@ -103,13 +78,12 @@ Deno.serve(async (req) => {
       args = JSON.parse(text);
     } catch (e) {
       console.error("JSON parse error:", e, "raw:", text);
-      return new Response(JSON.stringify({ error: "Lexi returned malformed data." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Lexi returned an unexpected response. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Dedupe + clean
     const seen = new Set<string>();
     const words = (args.words ?? [])
       .map((w) => (typeof w === "string" ? w.trim().toLowerCase() : ""))
@@ -121,10 +95,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("lexi-scan-word error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return geminiErrorResponse(e, corsHeaders);
   }
 });
