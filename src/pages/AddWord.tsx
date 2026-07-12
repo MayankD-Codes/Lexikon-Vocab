@@ -95,23 +95,23 @@ const AddWord = () => {
     }
     setAskingLexi(true);
     try {
-      const { data, error } = await supabase.functions.invoke("lexi-fill-word", { body: { word: w } });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const { data, error } = await invokeFunction<Record<string, string | undefined>>("lexi-fill-word", { word: w });
+      if (error) throw new Error(error);
+      const d = data ?? {};
       setForm((f) => ({
         ...f,
-        pronunciation: data.pronunciation ?? f.pronunciation,
-        spelling: data.spelling ?? f.spelling,
-        meaning_english: data.meaning_english ?? f.meaning_english,
-        meaning_hindi: data.meaning_hindi ?? f.meaning_hindi,
-        word_forms: data.word_forms ?? f.word_forms,
-        example_sentence: data.example_sentence ?? f.example_sentence,
-        synonyms: data.synonyms ?? f.synonyms,
-        antonyms: data.antonyms ?? f.antonyms,
-        // map combined POS string into the matching POS field
-        ...mapPosString(data.part_of_speech, w),
+        pronunciation: d.pronunciation ?? f.pronunciation,
+        spelling: d.spelling ?? f.spelling,
+        meaning_english: d.meaning_english ?? f.meaning_english,
+        meaning_hindi: d.meaning_hindi ?? f.meaning_hindi,
+        word_forms: d.word_forms ?? f.word_forms,
+        example_sentence: d.example_sentence ?? f.example_sentence,
+        synonyms: d.synonyms ?? f.synonyms,
+        antonyms: d.antonyms ?? f.antonyms,
+        ...mapPosString(d.part_of_speech, w),
       }));
       toast.success("Lexi filled it in. Review before saving.");
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lexi could not fetch this word");
     } finally {
