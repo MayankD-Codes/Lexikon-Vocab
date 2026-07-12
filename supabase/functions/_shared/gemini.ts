@@ -19,7 +19,10 @@ function getKeys(): string[] {
 }
 
 function isQuotaStatus(status: number): boolean {
-  return status === 429 || status === 403;
+  // Anything that isn't a client-input error (400/401 auth) is worth retrying
+  // on a different key: 403 (permission), 404 (model not available on this key),
+  // 429 (quota), 500-599 (server).
+  return status === 403 || status === 404 || status === 429 || status >= 500;
 }
 
 function isQuotaBody(text: string): boolean {
@@ -30,9 +33,13 @@ function isQuotaBody(text: string): boolean {
     t.includes("quota exceeded") ||
     t.includes("quota_exceeded") ||
     t.includes("rate limit") ||
-    t.includes("exceeded your current quota")
+    t.includes("exceeded your current quota") ||
+    t.includes("no longer available") ||
+    t.includes("not_found") ||
+    t.includes("permission_denied")
   );
 }
+
 
 export class GeminiError extends Error {
   status: number;
