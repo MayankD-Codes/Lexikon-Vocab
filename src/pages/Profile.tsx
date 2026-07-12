@@ -126,8 +126,14 @@ const Profile = () => {
 
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ avatar_url: publicUrl })
-      .eq("user_id", user.id);
+      .upsert(
+        {
+          user_id: user.id,
+          avatar_url: publicUrl,
+          username: username || `user_${user.id.slice(0, 8)}`,
+        },
+        { onConflict: "user_id" },
+      );
 
     setUploading(false);
     if (updateError) {
@@ -137,6 +143,7 @@ const Profile = () => {
     setAvatarUrl(publicUrl);
     toast.success("Avatar updated");
   };
+
 
   const initials =
     (displayName || user?.email || "?").trim().slice(0, 2).toUpperCase();
