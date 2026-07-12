@@ -1,5 +1,7 @@
-// Lexi — streaming chat assistant using Google Gemini 2.5 Flash directly
+// Lexi — streaming chat assistant using Gemini with multi-key failover
 import { requireUser } from "../_shared/auth.ts";
+import { callGemini, geminiErrorResponse } from "../_shared/gemini.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -32,48 +34,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
-
-    // Convert OpenAI-style messages to Gemini "contents" format.
     const contents = (messages as ChatMsg[]).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.content }],
     }));
 
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse`;
-
-    const upstream = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
+    const upstream = await callGemini({
+      model: MODEL,
+      method: "streamGenerateContent",
+      stream: true,
+      body: {
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents,
         generationConfig: { temperature: 0.7 },
-      }),
+      },
     });
 
-    if (!upstream.ok || !upstream.body) {
-      const t = await upstream.text();
-      console.error("Gemini error:", upstream.status, t);
-      if (upstream.status === 429) {
-        return new Response(JSON.stringify({ error: "Lexi is being asked a lot right now. Try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "Lexi had trouble responding." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!upstream.body) {
+      return new Response(
+        JSON.stringify({ error: "Lexi is currently busy. Please try again in a moment." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Transform Gemini SSE chunks into OpenAI-compatible SSE chunks
-    // so the existing client-side parser in src/lib/lexi.ts keeps working.
     const reader = upstream.body.getReader();
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
@@ -101,14 +84,10 @@ Deno.serve(async (req) => {
                   ?.map((p: { text?: string }) => p?.text ?? "")
                   .join("") ?? "";
                 if (text) {
-                  const out = {
-                    choices: [{ delta: { content: text } }],
-                  };
+                  const out = { choices: [{ delta: { content: text } }] };
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify(out)}\n\n`));
                 }
-              } catch {
-                // ignore partial / non-JSON
-              }
+              } catch { /* ignore partial */ }
             }
           }
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
@@ -124,10 +103,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
-    console.error("lexi-chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return geminiErrorResponse(e, corsHeaders);
   }
 });
