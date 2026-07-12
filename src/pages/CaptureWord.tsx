@@ -73,12 +73,12 @@ const CaptureWord = () => {
     try {
       const { data, mimeType } = await fileToCompressedBase64(file);
       setPreview(data);
-      const { data: res, error } = await supabase.functions.invoke("lexi-scan-word", {
-        body: { image: data, mimeType },
-      });
-      if (error) throw error;
-      if (res?.error) throw new Error(res.error);
-      const found: string[] = Array.isArray(res?.words) ? res.words : [];
+      const { data: res, error } = await invokeFunction<{ words?: string[]; raw_text?: string }>(
+        "lexi-scan-word",
+        { image: data, mimeType },
+      );
+      if (error) throw new Error(error);
+      const found: string[] = Array.isArray(res?.words) ? res!.words! : [];
       setWords(found);
       setRawText(typeof res?.raw_text === "string" ? res.raw_text : "");
       if (found.length === 0) toast.info("Lexi didn't spot any vocabulary in that photo.");
@@ -89,6 +89,7 @@ const CaptureWord = () => {
       setScanning(false);
     }
   };
+
 
   const toggleWord = (w: string) => {
     setSelected((prev) => {
