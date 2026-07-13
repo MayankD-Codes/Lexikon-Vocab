@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { friendlyAuthError } from "@/lib/friendlyError";
 
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import PasswordStrength, { passesAllChecks } from "@/components/PasswordStrength";
