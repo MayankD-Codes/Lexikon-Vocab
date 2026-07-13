@@ -273,15 +273,18 @@ const Auth = () => {
                 onClick={async () => {
                   setBusy(true);
                   try {
-                    const result = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: "google",
+                      options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        queryParams: { prompt: "select_account" },
+                      },
                     });
-                    if (result.error) {
-                      toast.error(friendlyAuthError(result.error as Error));
+                    if (error) {
+                      toast.error(friendlyAuthError(error));
                       setBusy(false);
-                      return;
                     }
-                    if (result.redirected) return;
+                    // On success the browser is redirected to Google.
                   } catch (e) {
                     toast.error(friendlyAuthError(e as Error));
                     setBusy(false);
