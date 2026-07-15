@@ -234,7 +234,22 @@ const Dictionary = () => {
         return;
       }
 
+      // Free-plan import guard: block the whole file rather than partially importing.
+      const usage = await getWordUsage(user.id);
+      if (!usage.isPro && usage.count + payload.length > usage.limit) {
+        toast({
+          title: "Free plan limit",
+          description: limitReachedMessage(usage.count, payload.length),
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("words").insert(payload as never);
+      if (error) {
+        toast({ title: "Import failed", description: friendlyError(error, "Couldn't import your words."), variant: "destructive" });
+        return;
+      }
       if (error) {
         toast({ title: "Import failed", description: friendlyError(error, "Couldn't import your words."), variant: "destructive" });
         return;
