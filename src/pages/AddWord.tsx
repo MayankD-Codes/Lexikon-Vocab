@@ -13,7 +13,6 @@ import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
 import { friendlyError } from "@/lib/friendlyError";
 import { getWordUsage, limitReachedMessage } from "@/lib/wordLimit";
-import { Link } from "react-router-dom";
 
 
 const schema = z.object({

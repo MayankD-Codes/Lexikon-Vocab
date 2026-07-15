@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { getWordUsage, limitReachedMessage } from "@/lib/wordLimit";
 
 
 const MAX_DIM = 1600;
@@ -118,6 +119,15 @@ const CaptureWord = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("Please sign in first.");
+        return;
+      }
+
+      // Free-plan bulk-add guard.
+      const usage = await getWordUsage(user.id);
+      if (!usage.isPro && usage.count + list.length > usage.limit) {
+        toast.error(limitReachedMessage(usage.count, list.length), {
+          action: { label: "Upgrade", onClick: () => (window.location.href = "/pricing") },
+        });
         return;
       }
       const rows = await Promise.all(
