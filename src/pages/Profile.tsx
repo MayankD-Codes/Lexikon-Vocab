@@ -24,6 +24,7 @@ const nameSchema = z
 
 const Profile = () => {
   const { user } = useAuth();
+  const { subscription, isPro, loading: subLoading } = useSubscription();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
