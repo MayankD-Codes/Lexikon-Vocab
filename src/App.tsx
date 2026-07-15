@@ -23,6 +23,9 @@ import Community from "./pages/Community.tsx";
 import MemoryPalace from "./pages/MemoryPalace.tsx";
 import CaptureWord from "./pages/CaptureWord.tsx";
 import UserProfile from "./pages/UserProfile.tsx";
+import Pricing from "./pages/Pricing.tsx";
+import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import PaymentCancelled from "./pages/PaymentCancelled.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +40,10 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              {/* Public billing routes — must be declared before the /:username catch */}
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-cancelled" element={<PaymentCancelled />} />
               <Route
                 element={
                   <ProtectedRoute>

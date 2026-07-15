@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
 import { friendlyError } from "@/lib/friendlyError";
+import { getWordUsage, limitReachedMessage } from "@/lib/wordLimit";
 
 
 const schema = z.object({
@@ -160,6 +161,17 @@ const AddWord = () => {
       setSaving(false);
       return;
     }
+
+    // Free-plan word-limit guard (DB trigger is the source of truth).
+    const usage = await getWordUsage(user.id);
+    if (!usage.isPro && usage.count >= usage.limit) {
+      setSaving(false);
+      toast.error(limitReachedMessage(usage.count, 1), {
+        action: { label: "Upgrade", onClick: () => (window.location.href = "/pricing") },
+      });
+      return;
+    }
+
     payload.user_id = user.id;
     const { error } = await supabase.from("words").insert(payload as never);
     setSaving(false);

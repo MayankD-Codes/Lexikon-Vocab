@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { z } from "zod";
-import { Camera, Loader2, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, User as UserIcon, Sparkles, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import SEO from "@/components/SEO";
 import { friendlyError, friendlyStorageError } from "@/lib/friendlyError";
 
@@ -22,6 +24,7 @@ const nameSchema = z
 
 const Profile = () => {
   const { user } = useAuth();
+  const { subscription, isPro, loading: subLoading } = useSubscription();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
@@ -235,6 +238,55 @@ const Profile = () => {
                 </Button>
               </div>
             </form>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-4 w-4" /> Billing
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {subLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription…
+            </div>
+          ) : (
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm text-muted-foreground">Current plan</p>
+                <p className="font-display text-2xl font-semibold">
+                  {isPro ? "Lexikon Pro" : "Free"}
+                </p>
+                {isPro && subscription.billing_interval && (
+                  <p className="text-xs text-muted-foreground mt-1 capitalize">
+                    {subscription.billing_interval} · {subscription.subscription_status}
+                    {subscription.current_period_end && (
+                      <> · renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
+                    )}
+                    {subscription.cancel_at_period_end && " · cancels at period end"}
+                  </p>
+                )}
+                {!isPro && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Up to 10 saved words. Upgrade for unlimited.
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {isPro ? (
+                  <Button variant="outline" size="sm" disabled title="Stripe Customer Portal — coming soon">
+                    Manage billing
+                  </Button>
+                ) : (
+                  <Button asChild size="sm">
+                    <Link to="/pricing">Upgrade <ArrowRight className="h-4 w-4" /></Link>
+                  </Button>
+                )}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
