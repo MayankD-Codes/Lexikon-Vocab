@@ -194,6 +194,69 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_processed_events: {
+        Row: {
+          event_type: string
+          processed_at: string
+          stripe_event_id: string
+        }
+        Insert: {
+          event_type: string
+          processed_at?: string
+          stripe_event_id: string
+        }
+        Update: {
+          event_type?: string
+          processed_at?: string
+          stripe_event_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       word_stats: {
         Row: {
           correct_count: number
@@ -373,6 +436,7 @@ export type Database = {
           word: string
         }[]
       }
+      is_user_pro: { Args: { _user_id: string }; Returns: boolean }
       is_username_available: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
