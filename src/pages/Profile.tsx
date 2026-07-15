@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { z } from "zod";
-import { Camera, Loader2, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, User as UserIcon, Sparkles, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import SEO from "@/components/SEO";
 import { friendlyError, friendlyStorageError } from "@/lib/friendlyError";
 
