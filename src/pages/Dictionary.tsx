@@ -11,6 +11,7 @@ import { Search, Plus, BookOpen, Download, Upload, FileDown } from "lucide-react
 import { toast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 import { friendlyError } from "@/lib/friendlyError";
+import { getWordUsage, limitReachedMessage } from "@/lib/wordLimit";
 
 const POS_PARTS = ["Noun", "Verb", "Adjective", "Adverb", "Pronoun", "Preposition", "Conjunction", "Interjection"] as const;
 
