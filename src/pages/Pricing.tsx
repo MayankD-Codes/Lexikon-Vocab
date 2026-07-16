@@ -140,12 +140,16 @@ const Pricing = () => {
                   {isPro ? (
                     <Button disabled className="mt-4" variant="outline">Current plan</Button>
                   ) : (
-                    <Button asChild className="mt-4">
-                      <a href={p.paymentLink} target="_blank" rel="noopener noreferrer">
-                        Subscribe {p.label}
-                      </a>
+                    <Button
+                      className="mt-4"
+                      onClick={() => startCheckout(p.interval)}
+                      disabled={starting !== null}
+                    >
+                      {starting === p.interval && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Subscribe {p.label}
                     </Button>
                   )}
+
                 </div>
               ))}
             </div>
