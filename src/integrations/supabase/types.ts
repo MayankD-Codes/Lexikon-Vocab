@@ -125,6 +125,66 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          event_id: string
+          event_type: string | null
+          processed_at: string
+          provider: string
+          raw_payload: Json | null
+        }
+        Insert: {
+          event_id: string
+          event_type?: string | null
+          processed_at?: string
+          provider: string
+          raw_payload?: Json | null
+        }
+        Update: {
+          event_id?: string
+          event_type?: string | null
+          processed_at?: string
+          provider?: string
+          raw_payload?: Json | null
+        }
+        Relationships: []
+      }
+      payment_verification_requests: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          payment_id: string
+          provider: string
+          reviewed_at: string | null
+          selected_plan: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_id: string
+          provider?: string
+          reviewed_at?: string | null
+          selected_plan: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_id?: string
+          provider?: string
+          reviewed_at?: string | null
+          selected_plan?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -214,12 +274,19 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          amount_paid: number | null
           billing_interval: string | null
           cancel_at_period_end: boolean
           created_at: string
+          currency: string
           current_period_end: string | null
+          current_period_start: string | null
           id: string
           plan: string
+          provider: string | null
+          provider_link_id: string | null
+          provider_payment_id: string | null
+          provider_payment_request_id: string | null
           stripe_customer_id: string | null
           stripe_price_id: string | null
           stripe_subscription_id: string | null
@@ -228,12 +295,19 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount_paid?: number | null
           billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
+          currency?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           id?: string
           plan?: string
+          provider?: string | null
+          provider_link_id?: string | null
+          provider_payment_id?: string | null
+          provider_payment_request_id?: string | null
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
           stripe_subscription_id?: string | null
@@ -242,12 +316,19 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount_paid?: number | null
           billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
+          currency?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           id?: string
           plan?: string
+          provider?: string | null
+          provider_link_id?: string | null
+          provider_payment_id?: string | null
+          provider_payment_request_id?: string | null
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
           stripe_subscription_id?: string | null

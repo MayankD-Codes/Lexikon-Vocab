@@ -260,13 +260,12 @@ const Profile = () => {
                 <p className="font-display text-2xl font-semibold">
                   {isPro ? "Lexikon Pro" : "Free"}
                 </p>
-                {isPro && subscription.billing_interval && (
+                {isPro && (
                   <p className="text-xs text-muted-foreground mt-1 capitalize">
-                    {subscription.billing_interval} · {subscription.subscription_status}
+                    {subscription.billing_interval ?? "pro"} · {subscription.subscription_status}
                     {subscription.current_period_end && (
-                      <> · renews {new Date(subscription.current_period_end).toLocaleDateString()}</>
+                      <> · access until {new Date(subscription.current_period_end).toLocaleDateString()}</>
                     )}
-                    {subscription.cancel_at_period_end && " · cancels at period end"}
                   </p>
                 )}
                 {!isPro && (
@@ -274,17 +273,16 @@ const Profile = () => {
                     Up to 10 saved words. Upgrade for unlimited.
                   </p>
                 )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Payments are currently handled through Instamojo payment links.
+                </p>
               </div>
               <div className="flex gap-2">
-                {isPro ? (
-                  <Button variant="outline" size="sm" disabled title="Stripe Customer Portal — coming soon">
-                    Manage billing
-                  </Button>
-                ) : (
-                  <Button asChild size="sm">
-                    <Link to="/pricing">Upgrade <ArrowRight className="h-4 w-4" /></Link>
-                  </Button>
-                )}
+                <Button asChild size="sm" variant={isPro ? "outline" : "default"}>
+                  <Link to="/pricing">
+                    {isPro ? "Renew / change plan" : "Upgrade"} <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           )}

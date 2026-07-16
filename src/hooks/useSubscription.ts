@@ -2,15 +2,18 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+export type SubscriptionStatus =
+  | "active" | "trialing" | "past_due" | "canceled" | "unpaid"
+  | "incomplete" | "incomplete_expired" | "none"
+  | "expired" | "pending" | "manual";
+
 export interface Subscription {
   plan: "free" | "pro";
-  subscription_status:
-    | "active" | "trialing" | "past_due" | "canceled" | "unpaid"
-    | "incomplete" | "incomplete_expired" | "none";
+  subscription_status: SubscriptionStatus;
   billing_interval: "monthly" | "quarterly" | "yearly" | null;
   current_period_end: string | null;
-  cancel_at_period_end: boolean;
-  stripe_customer_id: string | null;
+  current_period_start: string | null;
+  provider: string | null;
 }
 
 const DEFAULT_SUB: Subscription = {
@@ -18,11 +21,9 @@ const DEFAULT_SUB: Subscription = {
   subscription_status: "none",
   billing_interval: null,
   current_period_end: null,
-  cancel_at_period_end: false,
-  stripe_customer_id: null,
+  current_period_start: null,
+  provider: null,
 };
-
-const ACTIVE_STATUSES: Subscription["subscription_status"][] = ["active", "trialing"];
 
 export function useSubscription() {
   const { user } = useAuth();
@@ -39,7 +40,7 @@ export function useSubscription() {
     const { data } = await supabase
       .from("user_subscriptions")
       .select(
-        "plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id",
+        "plan, subscription_status, billing_interval, current_period_end, current_period_start, provider",
       )
       .eq("user_id", user.id)
       .maybeSingle();
@@ -51,14 +52,21 @@ export function useSubscription() {
 
   const now = Date.now();
   const periodEnd = sub.current_period_end ? Date.parse(sub.current_period_end) : null;
-  const withinPaidPeriod = periodEnd !== null && periodEnd > now;
+  const withinPaidPeriod = periodEnd === null ? false : periodEnd > now;
+
+  // Pro is active only when plan=pro, status is active/trialing/manual,
+  // AND (no expiry set OR expiry is in the future).
+  const activeStatus =
+    sub.subscription_status === "active" ||
+    sub.subscription_status === "trialing" ||
+    sub.subscription_status === "manual";
 
   const isPro =
     sub.plan === "pro" &&
-    (
-      ACTIVE_STATUSES.includes(sub.subscription_status) ||
-      (sub.subscription_status === "canceled" && withinPaidPeriod)
-    );
+    activeStatus &&
+    (periodEnd === null || withinPaidPeriod);
 
-  return { subscription: sub, isPro, loading, refresh: load };
+  const isPending = sub.subscription_status === "pending";
+
+  return { subscription: sub, isPro, isPending, loading, refresh: load };
 }
