@@ -113,13 +113,18 @@ const Pricing = () => {
                   ) : (
                     <Button asChild className="mt-4">
                       <a href={p.paymentLink} target="_blank" rel="noopener noreferrer">
-                        Choose {p.label}
+                        Subscribe {p.label}
                       </a>
                     </Button>
                   )}
                 </div>
               ))}
             </div>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              Payments are processed by Instamojo. Each payment grants Pro access for a fixed
+              duration (30 / 90 / 365 days). Not an auto-renewing subscription.
+            </p>
 
             <ul className="mt-6 grid sm:grid-cols-2 gap-y-2 gap-x-4 text-sm">
               {PRO_FEATURES.map((f) => (
