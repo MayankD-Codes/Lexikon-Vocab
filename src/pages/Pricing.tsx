@@ -1,43 +1,14 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Check, Sparkles, BookOpen, ArrowLeft, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Check, Sparkles, BookOpen, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { PLAN_OPTIONS, PRO_FEATURES, FREE_WORD_LIMIT } from "@/lib/billing";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
-import { invokeFunction } from "@/lib/invokeFunction";
-import { toast } from "@/hooks/use-toast";
-import type { BillingInterval } from "@/lib/billing";
 
 const Pricing = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { isPro, subscription, loading } = useSubscription();
-  const [starting, setStarting] = useState<BillingInterval | null>(null);
-
-  const startCheckout = async (interval: BillingInterval) => {
-    if (!user) {
-      navigate("/auth?next=/pricing");
-      return;
-    }
-    setStarting(interval);
-    const { data, error } = await invokeFunction<{ payment_url: string }>(
-      "create-instamojo-payment",
-      { interval, origin: window.location.origin },
-    );
-    setStarting(null);
-    if (error || !data?.payment_url) {
-      toast({
-        title: "Couldn't start payment",
-        description: error || "Please try again in a moment.",
-        variant: "destructive",
-      });
-      return;
-    }
-    window.location.href = data.payment_url;
-  };
-
 
   return (
     <main className="min-h-screen bg-gradient-paper">
@@ -140,16 +111,12 @@ const Pricing = () => {
                   {isPro ? (
                     <Button disabled className="mt-4" variant="outline">Current plan</Button>
                   ) : (
-                    <Button
-                      className="mt-4"
-                      onClick={() => startCheckout(p.interval)}
-                      disabled={starting !== null}
-                    >
-                      {starting === p.interval && <Loader2 className="h-4 w-4 animate-spin" />}
-                      Subscribe {p.label}
+                    <Button asChild className="mt-4">
+                      <a href={p.paymentLink} target="_blank" rel="noopener noreferrer">
+                        Subscribe {p.label}
+                      </a>
                     </Button>
                   )}
-
                 </div>
               ))}
             </div>
