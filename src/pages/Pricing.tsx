@@ -134,7 +134,8 @@ const Pricing = () => {
               ))}
             </ul>
             <p className="text-xs text-muted-foreground mt-6">
-              Prices in USD. Cancel anytime — you keep Pro access until the end of your billing period.
+              Prices in INR. Instamojo payments are one-time and grant Pro access for the
+              chosen duration. Renew any time from this page.
             </p>
           </div>
         </div>
