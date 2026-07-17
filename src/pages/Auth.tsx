@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { friendlyAuthError } from "@/lib/friendlyError";
+import { authCallbackUrl } from "@/lib/siteUrl";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -275,7 +276,7 @@ const Auth = () => {
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: "google",
                       options: {
-                        redirectTo: `${window.location.origin}/auth/callback`,
+                        redirectTo: authCallbackUrl(),
                         queryParams: { prompt: "select_account" },
                       },
                     });
