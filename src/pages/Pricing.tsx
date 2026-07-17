@@ -108,15 +108,11 @@ const Pricing = () => {
                   {p.perMonth && (
                     <p className="text-xs text-primary mt-1">{p.perMonth}</p>
                   )}
-                  {isPro ? (
-                    <Button disabled className="mt-4" variant="outline">Current plan</Button>
-                  ) : (
-                    <Button asChild className="mt-4">
-                      <a href={p.paymentLink} target="_blank" rel="noopener noreferrer">
-                        Subscribe {p.label}
-                      </a>
-                    </Button>
-                  )}
+                  <Button asChild className="mt-4" variant={isPro ? "outline" : "default"}>
+                    <a href={p.paymentLink} target="_blank" rel="noopener noreferrer">
+                      {isPro ? `Renew — ${p.label}` : `Get ${p.label}`}
+                    </a>
+                  </Button>
                 </div>
               ))}
             </div>

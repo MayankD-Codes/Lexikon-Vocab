@@ -18,39 +18,40 @@ export interface PlanOption {
 
 export const FREE_WORD_LIMIT = 10;
 
+const trimLink = (value: string | undefined, fallback: string) => value?.trim() || fallback;
+
 // Env override support (VITE_INSTAMOJO_*_LINK) with production defaults.
-const LINK_MONTHLY =
-  import.meta.env.VITE_INSTAMOJO_MONTHLY_LINK || "https://imjo.in/S9NDB4";
-const LINK_QUARTERLY =
-  import.meta.env.VITE_INSTAMOJO_QUARTERLY_LINK || "https://imjo.in/Zd3BDM";
-const LINK_YEARLY =
-  import.meta.env.VITE_INSTAMOJO_YEARLY_LINK || "https://imjo.in/qQbXfY";
+export const INSTAMOJO_LINKS = {
+  monthly: trimLink(import.meta.env.VITE_INSTAMOJO_MONTHLY_LINK, "https://imjo.in/S9NDB4"),
+  quarterly: trimLink(import.meta.env.VITE_INSTAMOJO_QUARTERLY_LINK, "https://imjo.in/Zd3BDM"),
+  yearly: trimLink(import.meta.env.VITE_INSTAMOJO_YEARLY_LINK, "https://imjo.in/qQbXfY"),
+} as const;
 
 export const PLAN_OPTIONS: PlanOption[] = [
   {
     interval: "monthly",
-    label: "Monthly",
+    label: "Lexikon Pro Monthly",
     price: "₹499",
-    cadence: "per month",
-    paymentLink: LINK_MONTHLY,
+    cadence: "30 days access",
+    paymentLink: INSTAMOJO_LINKS.monthly,
     durationDays: 30,
   },
   {
     interval: "quarterly",
-    label: "Quarterly",
+    label: "Lexikon Pro Quarterly",
     price: "₹1,299",
-    cadence: "every 3 months",
+    cadence: "90 days access",
     perMonth: "≈ ₹433 / mo",
-    paymentLink: LINK_QUARTERLY,
+    paymentLink: INSTAMOJO_LINKS.quarterly,
     durationDays: 90,
   },
   {
     interval: "yearly",
-    label: "Yearly",
+    label: "Lexikon Pro Yearly",
     price: "₹3,999",
-    cadence: "per year",
+    cadence: "365 days access",
     perMonth: "≈ ₹333 / mo",
-    paymentLink: LINK_YEARLY,
+    paymentLink: INSTAMOJO_LINKS.yearly,
     bestValue: true,
     durationDays: 365,
   },

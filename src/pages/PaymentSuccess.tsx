@@ -12,9 +12,9 @@ import { toast } from "@/hooks/use-toast";
 import type { BillingInterval } from "@/lib/billing";
 
 const PLAN_LABELS: Record<BillingInterval, string> = {
-  monthly: "Monthly (₹499 / 30 days)",
-  quarterly: "Quarterly (₹1,299 / 90 days)",
-  yearly: "Yearly (₹3,999 / 365 days)",
+  monthly: "Lexikon Pro Monthly (₹499 / 30 days)",
+  quarterly: "Lexikon Pro Quarterly (₹1,299 / 90 days)",
+  yearly: "Lexikon Pro Yearly (₹3,999 / 365 days)",
 };
 
 const PaymentSuccess = () => {

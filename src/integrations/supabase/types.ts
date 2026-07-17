@@ -517,6 +517,7 @@ export type Database = {
           word: string
         }[]
       }
+      ensure_my_profile: { Args: never; Returns: undefined }
       is_user_pro: { Args: { _user_id: string }; Returns: boolean }
       is_username_available: { Args: { _username: string }; Returns: boolean }
     }

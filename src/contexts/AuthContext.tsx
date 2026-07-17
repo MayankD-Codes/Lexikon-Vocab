@@ -27,6 +27,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const explicitSignOutRef = useRef(false);
 
   useEffect(() => {
+    const ensureProfile = (userId: string | undefined) => {
+      if (!userId) return;
+      void supabase.rpc("ensure_my_profile").then(({ error }) => {
+        if (error && import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.error("[ensure_my_profile]", error);
+        }
+      });
+    };
+
     // 1) Register listener FIRST so we don't miss the initial event.
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       setSession(sess);
@@ -34,6 +44,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (sess) {
         hadSessionRef.current = true;
+        if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+          ensureProfile(sess.user.id);
+        }
       } else if (event === "SIGNED_OUT" && hadSessionRef.current) {
         // Distinguish user-initiated sign-out from token expiry / revocation.
         if (!explicitSignOutRef.current) {
@@ -48,7 +61,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session) hadSessionRef.current = true;
+      if (data.session) {
+        hadSessionRef.current = true;
+        ensureProfile(data.session.user.id);
+      }
       setLoading(false);
     });
 
